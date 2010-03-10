@@ -2,7 +2,7 @@
 /**
  * xmlseclibs.php
  *
- * Copyright (c) 2007, Robert Richards <rrichards@cdatazone.org>.
+ * Copyright (c) 2007-2010, Robert Richards <rrichards@cdatazone.org>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @author     Robert Richards <rrichards@cdatazone.org>
- * @copyright  2007 Robert Richards <rrichards@cdatazone.org>
+ * @copyright  2007-2010 Robert Richards <rrichards@cdatazone.org>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    1.2.2
+ * @version    1.3.0-dev
  */
 
 /*
@@ -198,6 +198,9 @@ class XMLSecurityKey {
      */
     private $x509Certificate = NULL;
 
+    /* This variable contains the certificate thunbprint if we have loaded an X509-certificate. */
+    private $X509Thumbprint = NULL;
+
     public function __construct($type, $params=NULL) {
         srand();
         switch ($type) {
@@ -307,6 +310,33 @@ class XMLSecurityKey {
         return $key;
     }
 
+    public static function getRawThumbprint($cert) {
+
+        $arCert = explode("\n", $cert);
+        $data = '';
+        $inData = FALSE;
+
+        foreach ($arCert AS $curData) {
+            if (! $inData) {
+                if (strncmp($curData, '-----BEGIN CERTIFICATE', 22) == 0) {
+                    $inData = TRUE;
+                }
+            } else {
+                if (strncmp($curData, '-----END CERTIFICATE', 20) == 0) {
+                    $inData = FALSE;
+                    break;
+                }
+                $data .= trim($curData);
+            }
+        }
+
+        if (! empty($data)) {
+            return strtolower(sha1(base64_decode($data)));
+        }
+
+        return NULL;
+    }
+
     public function loadKey($key, $isFile=FALSE, $isCert = FALSE) {
         if ($isFile) {
             $this->key = file_get_contents($key);
@@ -323,6 +353,10 @@ class XMLSecurityKey {
         }
         if ($this->cryptParams['library'] == 'openssl') {
             if ($this->cryptParams['type'] == 'public') {
+                if ($isCert) {
+                    /* Load the thumbprint if this is an X509 certificate. */
+                    $this->X509Thumbprint = self::getRawThumbprint($this->key);
+                }
                 $this->key = openssl_get_publickey($this->key);
             } else {
                 $this->key = openssl_get_privatekey($this->key, $this->passphrase);
@@ -534,7 +568,16 @@ class XMLSecurityKey {
     public function getX509Certificate() {
         return $this->x509Certificate;
     }
-    
+
+    /* Get the thumbprint of this X509 certificate.
+     *
+     * Returns:
+     *  The thumbprint as a lowercase 40-character hexadecimal number, or NULL
+     *  if this isn't a X509 certificate.
+     */
+    public function getX509Thumbprint() {
+        return $this->X509Thumbprint;
+    }
 }
 
 class XMLSecurityDSig {
@@ -573,6 +616,10 @@ class XMLSecurityDSig {
         $this->sigNode = $sigdoc->documentElement;
     }
 
+    private function resetXPathObj() {
+        $this->xPathCtx = NULL;
+    }
+	
     private function getXPathObj() {
         if (empty($this->xPathCtx) && ! empty($this->sigNode)) {
             $xpath = new DOMXPath($this->sigNode->ownerDocument);
@@ -755,7 +802,7 @@ class XMLSecurityDSig {
                         if ($node->localName == 'InclusiveNamespaces') {
                             if ($pfx = $node->getAttribute('PrefixList')) {
                                 $arpfx = array();
-                                $pfxlist = split(" ", $pfx);
+                                $pfxlist = explode(" ", $pfx);
                                 foreach ($pfxlist AS $pfx) {
                                     $val = trim($pfx);
                                     if (! empty($val)) {
@@ -1057,7 +1104,13 @@ class XMLSecurityDSig {
         return $objKey->signData($data);
     }
 
-    public function sign($objKey) {
+    public function sign($objKey, $appendToNode = NULL) {
+        // If we have a parent node append it now so C14N properly works
+        if ($appendToNode != NULL) {
+            $this->resetXPathObj();
+            $this->appendSignature($appendToNode);
+            $this->sigNode = $appendToNode->lastChild;
+        }
         if ($xpath = $this->getXPathObj()) {
             $query = "./secdsig:SignedInfo";
             $nodeset = $xpath->query($query, $this->sigNode);
@@ -1230,10 +1283,29 @@ class XMLSecEnc {
     private $rawNode = NULL;
     public $type = NULL;
     public $encKey = NULL;
+    private $references = array();
 
     public function __construct() {
+        $this->_resetTemplate();
+    }
+
+    private function _resetTemplate(){
         $this->encdoc = new DOMDocument();
         $this->encdoc->loadXML(XMLSecEnc::template);
+    }
+
+    public function addReference($name, $node, $type) {
+	    if (! $node instanceOf DOMNode) {
+	        throw new Exception('$node is not of type DOMNode');
+	    }
+        $curencdoc = $this->encdoc;
+        $this->_resetTemplate();
+        $encdoc = $this->encdoc;
+        $this->encdoc = $curencdoc;
+        $refuri = XMLSecurityDSig::generate_GUID();
+        $element = $encdoc->documentElement;
+        $element->setAttribute("Id", $refuri);
+	    $this->references[$name] = array("node" => $node, "type" => $type, "encnode" => $encdoc, "refuri" => $refuri);
     }
 
     public function setNode($node) {
@@ -1300,6 +1372,26 @@ class XMLSecEnc {
                     break;
             }
         }
+    }
+
+    public function encryptReferences($objKey) {
+        $curRawNode = $this->rawNode;
+        $curType = $this->type;
+        foreach ($this->references AS $name=>$reference) {
+            $this->encdoc = $reference["encnode"];
+            $this->rawNode = $reference["node"];
+            $this->type = $reference["type"];
+            try {
+                $encNode = $this->encryptNode($objKey);
+                $this->references[$name]["encnode"] = $encNode;
+            } catch (Exception $e) {
+                $this->rawNode = $curRawNode;
+                $this->type = $curType;
+                throw $e;
+            }
+        }
+        $this->rawNode = $curRawNode;
+        $this->type = $curType;
     }
 
     public function decryptNode($objKey, $replace=TRUE) {
@@ -1376,6 +1468,14 @@ class XMLSecEnc {
         }
         $cipherData = $encKey->appendChild($this->encdoc->createElementNS(XMLSecEnc::XMLENCNS, 'xenc:CipherData'));
         $cipherData->appendChild($this->encdoc->createElementNS(XMLSecEnc::XMLENCNS, 'xenc:CipherValue', $strEncKey));
+        if (is_array($this->references) && count($this->references) > 0) {
+           $refList =  $encKey->appendChild($this->encdoc->createElementNS(XMLSecEnc::XMLENCNS, 'xenc:ReferenceList'));
+            foreach ($this->references AS $name=>$reference) {
+                $refuri = $reference["refuri"];
+                $dataRef = $refList->appendChild($this->encdoc->createElementNS(XMLSecEnc::XMLENCNS, 'xenc:DataReference'));
+                $dataRef->setAttribute("URI", '#' . $refuri);
+            }
+        }
         return;
     }
 
