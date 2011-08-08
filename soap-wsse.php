@@ -221,16 +221,21 @@ class WSSESoap {
                 break; 
             } 
         } 
-         
+        
+        $algorithm = XMLSecurityDSig::SHA1;
+        if (is_array($options) && isset($options["algorithm"])) {
+            $algorithm = $options["algorithm"];
+        }
+        
         $arOptions = array('prefix'=>WSSESoap::WSUPFX, 'prefix_ns'=>WSSESoap::WSUNS); 
-        $objDSig->addReferenceList($arNodes, XMLSecurityDSig::SHA1, NULL, $arOptions); 
+        $objDSig->addReferenceList($arNodes, $algorithm, NULL, $arOptions); 
 
         $objDSig->sign($objKey); 
 
         $insertTop = TRUE;
         if (is_array($options) && isset($options["insertBefore"])) {
             $insertTop = (bool)$options["insertBefore"];
-    } 
+        }
         $objDSig->appendSignature($this->secNode, $insertTop);
 
 /* New suff */
