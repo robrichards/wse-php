@@ -1,8 +1,8 @@
 <?php
 require('../soap-wsse.php');
 
-define('PRIVATE_KEY', 'C:\TEMP\pk-amazon-private-key.pem');
-define('CERT_FILE', 'C:\temp\cert-amazon-cert.pem');
+define('PRIVATE_KEY', './pk-amazon-private-key.pem');
+define('CERT_FILE', './cert-amazon-cert.pem');
 
 class mySoap extends SoapClient {
 
@@ -35,7 +35,7 @@ class instances {
     public $instancesSet = NULL;
 }
 
-$wsdl = 'http://ec2.amazonaws.com/doc/2006-06-26/AmazonEC2.wsdl';
+$wsdl = 'http://s3.amazonaws.com/ec2-downloads/ec2.wsdl';
 
 try {
     $sClient = new mySoap($wsdl, array('trace'=>1));
