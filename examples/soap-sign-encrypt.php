@@ -22,7 +22,7 @@ class mySoap extends SoapClient {
         /* load the private key from file - last arg is bool if key in file (TRUE) or is string (FALSE) */
         $objKey->loadKey(PRIVATE_KEY, TRUE);
         
-        /* Sign the message - also signs appropraite WS-Security items */
+        /* Sign the message - also signs appropiate WS-Security items */
         $options = array("insertBefore" => FALSE);
         $objWSSE->signSoapDoc($objKey, $options);
         
