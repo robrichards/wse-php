@@ -37,7 +37,7 @@
  * @author     Robert Richards <rrichards@ctindustries.net> 
  * @copyright  2007-2015 Robert Richards <rrichards@ctindustries.net> 
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License 
- * @version    1.1.0 
+ * @version    1.1.1-dev
  */ 
   
 require('xmlseclibs.php'); 
@@ -187,7 +187,8 @@ class WSSESoap {
              
             $tokenRef = $this->soapDoc->createElementNS(WSSESoap::WSSENS, WSSESoap::WSSEPFX.':SecurityTokenReference'); 
             $keyInfo->appendChild($tokenRef); 
-            $reference = $this->soapDoc->createElementNS(WSSESoap::WSSENS, WSSESoap::WSSEPFX.':Reference'); 
+            $reference = $this->soapDoc->createElementNS(WSSESoap::WSSENS, WSSESoap::WSSEPFX.':Reference');
+            $reference->setAttribute('ValueType', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3');
             $reference->setAttribute("URI", $tokenURI); 
             $tokenRef->appendChild($reference); 
         } else { 
