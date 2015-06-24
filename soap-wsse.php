@@ -35,9 +35,9 @@
  * POSSIBILITY OF SUCH DAMAGE. 
  * 
  * @author     Robert Richards <rrichards@ctindustries.net> 
- * @copyright  2007-2010 Robert Richards <rrichards@ctindustries.net> 
+ * @copyright  2007-2015 Robert Richards <rrichards@ctindustries.net> 
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License 
- * @version    1.1.0-dev 
+ * @version    1.1.0 
  */ 
   
 require('xmlseclibs.php'); 
@@ -53,7 +53,8 @@ class WSSESoap {
     private $envelope = NULL; 
     private $SOAPXPath = NULL; 
     private $secNode = NULL; 
-    public $signAllHeaders = FALSE; 
+    public $signAllHeaders = FALSE;
+    public $signBody = TRUE;
      
     private function locateSecurityHeader($bMustUnderstand = TRUE, $setActor = NULL) { 
         if ($this->secNode == NULL) { 
@@ -215,12 +216,14 @@ class WSSESoap {
             } 
         } 
 
-        foreach ($this->envelope->childNodes AS $node) { 
-            if ($node->namespaceURI == $this->soapNS && $node->localName == 'Body') { 
-                $arNodes[] = $node; 
-                break; 
-            } 
-        } 
+        if ($this->signBody) {
+	        foreach ($this->envelope->childNodes AS $node) { 
+	            if ($node->namespaceURI == $this->soapNS && $node->localName == 'Body') { 
+	                $arNodes[] = $node; 
+	                break; 
+	            } 
+	        }
+        }
         
         $algorithm = XMLSecurityDSig::SHA1;
         if (is_array($options) && isset($options["algorithm"])) {

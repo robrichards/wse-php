@@ -1,6 +1,6 @@
 wse-php
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2010, 1.1.0
+24 Jun 2015, 1.1.0
 Features:
 - Add options parameter to signSoapDoc() method.
   options include insertBefore and KeyInfo array (X509SubjectKeyIdentifier).
@@ -10,6 +10,7 @@ Features:
 - Add decryptSoapDoc() method
 - Libraries now provide ability to interoperate with WCF servers using message 
   level security (Signatures and Encryption).
+- Add signBody property (boolean) to allow for disabling of signing soap body.
 
 08 Mar 2010, 1.0.0
 Initial import of libraries to repository from cdatazone web site
