@@ -355,7 +355,7 @@ class WSSESoap
     {
         $refList = null;
         $child = $baseNode->firstChild;
-        while($child) {
+        while ($child) {
             if (($child->namespaceURI == XMLSecEnc::XMLENCNS) && ($child->localName == 'ReferenceList')) {
                 $refList = $child;
                 break;
@@ -393,7 +393,7 @@ class WSSESoap
         $encNode->setAttribute('Id', $guid);
 
         $refNode = $encNode->firstChild;
-        while($refNode && $refNode->nodeType != XML_ELEMENT_NODE) {
+        while ($refNode && $refNode->nodeType != XML_ELEMENT_NODE) {
             $refNode = $refNode->nextSibling;
         }
         if ($refNode) {
@@ -407,96 +407,96 @@ class WSSESoap
     public function encryptSoapDoc($siteKey, $objKey, $options=null, $encryptSignature=true)
     {
 
-		$enc = new XMLSecEnc();
+        $enc = new XMLSecEnc();
 
-		$xpath = new DOMXPath($this->envelope->ownerDocument);
-		if ($encryptSignature ==  false) {
-			$nodes = $xpath->query('//*[local-name()="Body"]');
-		} else {
-			$nodes = $xpath->query('//*[local-name()="Signature"] | //*[local-name()="Body"]');
-		}
-		
-		foreach ($nodes AS $node) {
-			$type = XMLSecEnc::Element;
-			$name = $node->localName;
-			if ($name == "Body") {
-				$type = XMLSecEnc::Content;
-			}
-			$enc->addReference($name, $node, $type);
-		}
+        $xpath = new DOMXPath($this->envelope->ownerDocument);
+        if ($encryptSignature == false) {
+            $nodes = $xpath->query('//*[local-name()="Body"]');
+        } else {
+            $nodes = $xpath->query('//*[local-name()="Signature"] | //*[local-name()="Body"]');
+        }
+        
+        foreach ($nodes AS $node) {
+            $type = XMLSecEnc::Element;
+            $name = $node->localName;
+            if ($name == "Body") {
+                $type = XMLSecEnc::Content;
+            }
+            $enc->addReference($name, $node, $type);
+        }
 
-		$enc->encryptReferences($objKey);
-		
-		$enc->encryptKey($siteKey, $objKey, false);
-		
-		$nodes = $xpath->query('//*[local-name()="Security"]');
-		$signode = $nodes->item(0);
-		$this->addEncryptedKey($signode, $enc, $siteKey, $options);
+        $enc->encryptReferences($objKey);
+        
+        $enc->encryptKey($siteKey, $objKey, false);
+        
+        $nodes = $xpath->query('//*[local-name()="Security"]');
+        $signode = $nodes->item(0);
+        $this->addEncryptedKey($signode, $enc, $siteKey, $options);
     }
     
     public function decryptSoapDoc($doc, $options)
     {
 
-		$privKey = null;
-		$privKey_isFile = false;
-		$privKey_isCert = false;
-		
-		if (is_array($options)) {
-			$privKey = (! empty($options["keys"]["private"]["key"]) ? $options["keys"]["private"]["key"] : null);
-			$privKey_isFile = (! empty($options["keys"]["private"]["isFile"]) ? true : false);
-			$privKey_isCert = (! empty($options["keys"]["private"]["isCert"])  ? true : false);
-		}
-		
-		$objenc = new XMLSecEnc();
+        $privKey = null;
+        $privKey_isFile = false;
+        $privKey_isCert = false;
+        
+        if (is_array($options)) {
+            $privKey = (! empty($options["keys"]["private"]["key"]) ? $options["keys"]["private"]["key"] : null);
+            $privKey_isFile = (! empty($options["keys"]["private"]["isFile"]) ? true : false);
+            $privKey_isCert = (! empty($options["keys"]["private"]["isCert"]) ? true : false);
+        }
+        
+        $objenc = new XMLSecEnc();
 
-		$xpath = new DOMXPath($doc);
-		$envns = $doc->documentElement->namespaceURI;
-		$xpath->registerNamespace("soapns", $envns);
-		$xpath->registerNamespace("soapenc", "http://www.w3.org/2001/04/xmlenc#");
+        $xpath = new DOMXPath($doc);
+        $envns = $doc->documentElement->namespaceURI;
+        $xpath->registerNamespace("soapns", $envns);
+        $xpath->registerNamespace("soapenc", "http://www.w3.org/2001/04/xmlenc#");
 
-		$nodes = $xpath->query('/soapns:Envelope/soapns:Header/*[local-name()="Security"]/soapenc:EncryptedKey');
+        $nodes = $xpath->query('/soapns:Envelope/soapns:Header/*[local-name()="Security"]/soapenc:EncryptedKey');
 
-		$references = array();
-		if ($node = $nodes->item(0)) {
-			$objenc = new XMLSecEnc();
-			$objenc->setNode($node);
-		    if (! $objKey = $objenc->locateKey()) {
-		        throw new Exception("Unable to locate algorithm for this Encrypted Key");
-		    }
-		    $objKey->isEncrypted = true;
-		    $objKey->encryptedCtx = $objenc;
-		    XMLSecEnc::staticLocateKeyInfo($objKey, $node);
-			if ($objKey && $objKey->isEncrypted) {
-				$objencKey = $objKey->encryptedCtx;
-				$objKey->loadKey($privKey, $privKey_isFile, $privKey_isCert);
-				$key = $objencKey->decryptKey($objKey);
-				$objKey->loadKey($key);
-			}
+        $references = array();
+        if ($node = $nodes->item(0)) {
+            $objenc = new XMLSecEnc();
+            $objenc->setNode($node);
+            if (! $objKey = $objenc->locateKey()) {
+                throw new Exception("Unable to locate algorithm for this Encrypted Key");
+            }
+            $objKey->isEncrypted = true;
+            $objKey->encryptedCtx = $objenc;
+            XMLSecEnc::staticLocateKeyInfo($objKey, $node);
+            if ($objKey && $objKey->isEncrypted) {
+                $objencKey = $objKey->encryptedCtx;
+                $objKey->loadKey($privKey, $privKey_isFile, $privKey_isCert);
+                $key = $objencKey->decryptKey($objKey);
+                $objKey->loadKey($key);
+            }
 
-			$refnodes = $xpath->query('./soapenc:ReferenceList/soapenc:DataReference/@URI', $node);
-			foreach ($refnodes as $reference) {
-				$references[] = $reference->nodeValue;
-			}
-		}
+            $refnodes = $xpath->query('./soapenc:ReferenceList/soapenc:DataReference/@URI', $node);
+            foreach ($refnodes as $reference) {
+                $references[] = $reference->nodeValue;
+            }
+        }
 
-		foreach ($references AS $reference) {
-			$arUrl = parse_url($reference);
-			$reference = $arUrl['fragment'];
-			$query = '//*[@Id="'.$reference.'"]';
-			$nodes = $xpath->query($query);
-			$encData = $nodes->item(0);
+        foreach ($references AS $reference) {
+            $arUrl = parse_url($reference);
+            $reference = $arUrl['fragment'];
+            $query = '//*[@Id="'.$reference.'"]';
+            $nodes = $xpath->query($query);
+            $encData = $nodes->item(0);
 
-			if ($algo = $xpath->evaluate("string(./soapenc:EncryptionMethod/@Algorithm)", $encData)) {
-				$objKey = new XMLSecurityKey($algo);
-				$objKey->loadKey($key);
-			}
+            if ($algo = $xpath->evaluate("string(./soapenc:EncryptionMethod/@Algorithm)", $encData)) {
+                $objKey = new XMLSecurityKey($algo);
+                $objKey->loadKey($key);
+            }
 
-			$objenc->setNode($encData);
-			$objenc->type = $encData->getAttribute("Type");
-			$decrypt = $objenc->decryptNode($objKey, true);
-		}
-		
-		return true;
+            $objenc->setNode($encData);
+            $objenc->type = $encData->getAttribute("Type");
+            $decrypt = $objenc->decryptNode($objKey, true);
+        }
+        
+        return true;
     }
 
     public function saveXML()
