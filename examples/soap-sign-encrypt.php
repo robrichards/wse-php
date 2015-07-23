@@ -1,13 +1,15 @@
 <?php
-require('soap-wsse.php');
+require 'soap-wsse.php';
 
 define('PRIVATE_KEY', 'priv_key.pem');
 define('CERT_FILE', 'pub_key.pem');
 define('SERVICE_CERT', 'sitekey_pub.cer');
 
-class mySoap extends SoapClient {
+class MySoap extends SoapClient
+{
 
-    function __doRequest($request, $location, $saction, $version) {
+    public function __doRequest($request, $location, $saction, $version)
+    {
         $doc = new DOMDocument('1.0');
         $doc->loadXML($request);
         
@@ -17,13 +19,13 @@ class mySoap extends SoapClient {
         $objWSSE->addTimestamp();
         
         /* create new XMLSec Key using AES256_CBC and type is private key */
-        $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, array('type'=>'private'));
+        $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, array('type' => 'private'));
         
-        /* load the private key from file - last arg is bool if key in file (TRUE) or is string (FALSE) */
-        $objKey->loadKey(PRIVATE_KEY, TRUE);
+        /* load the private key from file - last arg is bool if key in file (true) or is string (false) */
+        $objKey->loadKey(PRIVATE_KEY, true);
         
         /* Sign the message - also signs appropiate WS-Security items */
-        $options = array("insertBefore" => FALSE);
+        $options = array("insertBefore" => false);
         $objWSSE->signSoapDoc($objKey, $options);
         
         /* Add certificate (BinarySecurityToken) to the message */
@@ -35,8 +37,8 @@ class mySoap extends SoapClient {
         $objKey = new XMLSecurityKey(XMLSecurityKey::AES256_CBC);
         $objKey->generateSessionKey();
         
-        $siteKey = new XMLSecurityKey(XMLSecurityKey::RSA_OAEP_MGF1P, array('type'=>'public'));
-        $siteKey->loadKey(SERVICE_CERT, TRUE, TRUE);
+        $siteKey = new XMLSecurityKey(XMLSecurityKey::RSA_OAEP_MGF1P, array('type' => 'public'));
+        $siteKey->loadKey(SERVICE_CERT, true, true);
         
         $options = array("KeyInfo" => array("X509SubjectKeyIdentifier" => true));
         $objWSSE->encryptSoapDoc($siteKey, $objKey, $options);
@@ -46,16 +48,16 @@ class mySoap extends SoapClient {
         $doc = new DOMDocument();
         $doc->loadXML($retVal);
         
-        $options = array("keys" => array("private" => array("key" => PRIVATE_KEY, "isFile" => TRUE, "isCert" => FALSE)));
+        $options = array("keys" => array("private" => array("key" => PRIVATE_KEY, "isFile" => true, "isCert" => false)));
         $objWSSE->decryptSoapDoc($doc, $options);
         
         return $doc->saveXML();
     }
 }
 
-$wsdl = <wsdl location>;
+$wsdl = '<wsdl location>';
 
-$sc = new mySoap($wsdl);
+$sc = new MySoap($wsdl);
 
 try {
     $out = $sc->callmethod(1);
