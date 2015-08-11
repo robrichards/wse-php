@@ -131,7 +131,9 @@ class WSSESoap
         $token = $this->soapDoc->createElementNS(self::WSSENS, self::WSSEPFX.':UsernameToken');
         $security->insertBefore($token, $security->firstChild);
 
-        $username = $this->soapDoc->createElementNS(self::WSSENS,  self::WSSEPFX.':Username', $userName);
+        $username = $this->soapDoc->createElementNS(self::WSSENS,  self::WSSEPFX.':Username');
+        $usernameText = $this->soapDoc->createTextNode($userName);
+        $username->appendChild($usernameText);
         $token->appendChild($username);
          
         /* Generate nonce - create a 256 bit session key to be used */
@@ -146,8 +148,10 @@ class WSSESoap
                 $password = base64_encode(sha1($nonce.$createdate. $password, true));
                 $passType = self::WSUNAME.'#PasswordDigest';
             }
-            $passwordNode = $this->soapDoc->createElementNS(self::WSSENS,  self::WSSEPFX.':Password', $password);
+            $passwordNode = $this->soapDoc->createElementNS(self::WSSENS,  self::WSSEPFX.':Password');
             $token->appendChild($passwordNode);
+            $passwordText = $this->soapDoc->createTextNode($password);
+            $passwordNode->appendChild($passwordText);
             $passwordNode->setAttribute('Type', $passType);
         }
 
