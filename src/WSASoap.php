@@ -100,7 +100,7 @@ class WSASoap
     private function createID()
     {
         $uuid = md5(uniqid(rand(), true));
-        $guid = 'uudi:'.substr($uuid, 0, 8)."-".
+        $guid = 'uuid:'.substr($uuid, 0, 8)."-".
                 substr($uuid, 8, 4)."-".
                 substr($uuid, 12, 4)."-".
                 substr($uuid, 16, 4)."-".
