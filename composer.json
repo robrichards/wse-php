@@ -3,6 +3,7 @@
     "description": "Libraries for adding WS-* support to ext/soap in PHP.",
     "license": "BSD",
     "autoload": {
-        "psr-0": { "": "src/" }
+        "psr-0": { "": "src/" },
+        "files": ["xmlseclibs.php"]
     }
 }
