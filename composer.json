@@ -1,0 +1,4 @@
+{
+    "name": "robrichards/wse-php",
+    "description": "Libraries for adding WS-* support to ext/soap in PHP."
+}
