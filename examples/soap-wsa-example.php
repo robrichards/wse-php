@@ -1,6 +1,9 @@
 <?php
-require 'soap-wsa.php';
-require 'soap-wsse.php';
+require __DIR__ . '/../vendor/autoload.php';
+
+use RobRichards\WsePhp\WSASoap;
+use RobRichards\WsePhp\WSSESoap;
+use RobRichards\XMLSecLibs\XMLSecurityKey;
 
 define('PRIVATE_KEY', 'pk-private_key.pem');
 define('CERT_FILE', 'cert-public_key.pem');

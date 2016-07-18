@@ -1,5 +1,8 @@
 <?php
-require 'soap-wsse.php';
+require __DIR__ . '/../vendor/autoload.php';
+
+use RobRichards\WsePhp\WSSESoap;
+use RobRichards\XMLSecLibs\XMLSecurityKey;
 
 define('PRIVATE_KEY', 'pk-private_key.pem');
 define('CERT_FILE', 'cert-public_key.pem');
@@ -10,21 +13,21 @@ class MySoap extends SoapClient
     private $_username;
     private $_password;
     private $_digest;
-    
+
     public function addUserToken($username, $password, $digest = false)
     {
         $this->_username = $username;
         $this->_password = $password;
         $this->_digest = $digest;
     }
-    
+
     public function __doRequest($request, $location, $saction, $version, $one_way = 0)
     {
         $doc = new DOMDocument('1.0');
         $doc->loadXML($request);
-        
+
         $objWSSE = new WSSESoap($doc);
-        
+
         /* Sign all headers to include signing the WS-Addressing headers */
         $objWSSE->signAllHeaders = true;
 
@@ -43,7 +46,7 @@ class MySoap extends SoapClient
         /* Add certificate (BinarySecurityToken) to the message and attach pointer to Signature */
         $token = $objWSSE->addBinaryToken(file_get_contents(CERT_FILE));
         $objWSSE->attachTokentoSig($token);
-        
+
         $request = $objWSSE->saveXML();
         return parent::__doRequest($request, $location, $saction, $version);
     }
