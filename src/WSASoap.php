@@ -1,10 +1,11 @@
 <?php
+
 namespace RobRichards\WsePhp;
 
 use DOMXPath;
 
 /**
- * WSASoap.php
+ * WSASoap.php.
  *
  * Copyright (c) 2007-2015, Robert Richards <rrichards@ctindustries.net>.
  * All rights reserved.
@@ -41,9 +42,9 @@ use DOMXPath;
  * @author    Robert Richards <rrichards@ctindustries.net>
  * @copyright 2007-2015 Robert Richards <rrichards@ctindustries.net>
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ *
  * @version   1.2.0-dev
  */
-
 class WSASoap
 {
     const WSANS = 'http://schemas.xmlsoap.org/ws/2004/08/addressing';
@@ -60,12 +61,13 @@ class WSASoap
         if ($this->header == null) {
             $headers = $this->SOAPXPath->query('//wssoap:Envelope/wssoap:Header');
             $header = $headers->item(0);
-            if (! $header) {
+            if (!$header) {
                 $header = $this->soapDoc->createElementNS($this->soapNS, $this->soapPFX.':Header');
                 $this->envelope->insertBefore($header, $this->envelope->firstChild);
             }
             $this->header = $header;
         }
+
         return $this->header;
     }
 
@@ -79,7 +81,7 @@ class WSASoap
         $this->SOAPXPath->registerNamespace('wssoap', $this->soapNS);
         $this->SOAPXPath->registerNamespace('wswsa', self::WSANS);
 
-        $this->envelope->setAttributeNS("http://www.w3.org/2000/xmlns/", 'xmlns:'.self::WSAPFX, self::WSANS);
+        $this->envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:'.self::WSAPFX, self::WSANS);
         $this->locateHeader();
     }
 
@@ -104,18 +106,19 @@ class WSASoap
     private function createID()
     {
         $uuid = md5(uniqid(rand(), true));
-        $guid = 'uuid:'.substr($uuid, 0, 8)."-".
-                substr($uuid, 8, 4)."-".
-                substr($uuid, 12, 4)."-".
-                substr($uuid, 16, 4)."-".
+        $guid = 'uuid:'.substr($uuid, 0, 8).'-'.
+                substr($uuid, 8, 4).'-'.
+                substr($uuid, 12, 4).'-'.
+                substr($uuid, 16, 4).'-'.
                 substr($uuid, 20, 12);
+
         return $guid;
     }
 
-    public function addMessageID($id=null)
+    public function addMessageID($id = null)
     {
         /* Add the WSA MessageID or return existing ID */
-        if (! is_null($this->messageID)) {
+        if (!is_null($this->messageID)) {
             return $this->messageID;
         }
 
