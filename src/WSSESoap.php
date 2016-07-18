@@ -183,7 +183,7 @@ class WSSESoap
         $security->insertBefore($token, $security->firstChild);
 
         $token->setAttribute('EncodingType', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary');
-        $token->setAttributeNS(self::WSUNS, self::WSUPFX.':Id', XMLSecurityDSig::generate_GUID());
+        $token->setAttributeNS(self::WSUNS, self::WSUPFX.':Id', XMLSecurityDSig::generateGUID());
         $token->setAttribute('ValueType', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3');
 
         return $token;
@@ -321,7 +321,7 @@ class WSSESoap
         }
 
         $security->insertBefore($encKey, $lastToken);
-        $key->guid = XMLSecurityDSig::generate_GUID();
+        $key->guid = XMLSecurityDSig::generateGUID();
         $encKey->setAttribute('Id', $key->guid);
         $encMethod = $encKey->firstChild;
         while ($encMethod && $encMethod->localName != 'EncryptionMethod') {
@@ -403,7 +403,7 @@ class WSSESoap
         /* Using the symmetric key to actually encrypt the data */
         $encNode = $enc->encryptNode($objKey);
 
-        $guid = XMLSecurityDSig::generate_GUID();
+        $guid = XMLSecurityDSig::generateGUID();
         $encNode->setAttribute('Id', $guid);
 
         $refNode = $encNode->firstChild;

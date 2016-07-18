@@ -3,6 +3,7 @@
 namespace RobRichards\WsePhp;
 
 use DOMXPath;
+use RobRichards\XMLSecLibs\XMLSecurityDSig;
 
 /**
  * WSASoap.php.
@@ -103,18 +104,6 @@ class WSASoap
         $header->appendChild($nodeTo);
     }
 
-    private function createID()
-    {
-        $uuid = md5(uniqid(rand(), true));
-        $guid = 'uuid:'.substr($uuid, 0, 8).'-'.
-                substr($uuid, 8, 4).'-'.
-                substr($uuid, 12, 4).'-'.
-                substr($uuid, 16, 4).'-'.
-                substr($uuid, 20, 12);
-
-        return $guid;
-    }
-
     public function addMessageID($id = null)
     {
         /* Add the WSA MessageID or return existing ID */
@@ -123,7 +112,7 @@ class WSASoap
         }
 
         if (empty($id)) {
-            $id = $this->createID();
+            $id = XMLSecurityDSig::generateGUID('uuid:');
         }
 
         $header = $this->locateHeader();
