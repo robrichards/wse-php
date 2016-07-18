@@ -1,4 +1,11 @@
 <?php
+namespace RobRichards\WsePhp;
+
+use DOMXPath;
+use Exception;
+use RobRichards\XMLSecLibs\XMLSecEnc;
+use RobRichards\XMLSecLibs\XMLSecurityDSig;
+
 /**
  * WSSESoapServer.php
  *
@@ -179,7 +186,7 @@ class WSSESoapServer
         $this->secNode = null;
         return true;
     }
-     
+
     public function saveXML()
     {
         return $this->soapDoc->saveXML();
