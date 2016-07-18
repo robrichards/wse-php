@@ -8,7 +8,7 @@ use RobRichards\XMLSecLibs\XMLSecurityDSig;
 /**
  * WSASoap.php.
  *
- * Copyright (c) 2007-2015, Robert Richards <rrichards@ctindustries.net>.
+ * Copyright (c) 2007-2016, Robert Richards <rrichards@ctindustries.net>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ use RobRichards\XMLSecLibs\XMLSecurityDSig;
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @author    Robert Richards <rrichards@ctindustries.net>
- * @copyright 2007-2015 Robert Richards <rrichards@ctindustries.net>
+ * @copyright 2007-2016 Robert Richards <rrichards@ctindustries.net>
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  *
  * @version   1.2.0-dev
