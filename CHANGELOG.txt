@@ -1,6 +1,9 @@
 wse-php
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, 1.1.1
+21 Oct 2016, 2.0.0
+Features:
+- Upgrade to use namespaces. Requires PHP 5.3+.
+
 Bug Fixes:
 - Add ValueType attribute when attaching token
 
