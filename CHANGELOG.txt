@@ -1,6 +1,8 @@
 wse-php
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, 2.0.1
+09 Mar 2017, 2.0.1
+Improvements:
+- Change depreciated split to explode.
 
 21 Oct 2016, 2.0.0
 Features:
