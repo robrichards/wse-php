@@ -95,6 +95,21 @@ class WSASoap
         $header->appendChild($nodeAction);
     }
 
+    public function addFrom($location = null)
+    {
+        /* Add the WSA From */
+        $header = $this->locateHeader();
+
+        $nodeFrom = $this->soapDoc->createElementNS(self::WSANS, self::WSAPFX.':From');
+        $header->appendChild($nodeFrom);
+
+        if (empty($location)) {
+        	$location = 'http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous';
+        }
+        $nodeAddress = $this->soapDoc->createElementNS(self::WSANS, self::WSAPFX.':Address', $location);
+        $nodeFrom->appendChild($nodeAddress);
+    }
+    
     public function addTo($location)
     {
         /* Add the WSA To */
