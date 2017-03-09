@@ -95,6 +95,17 @@ class WSASoap
         $header->appendChild($nodeAction);
     }
 
+    public function addFrom($location)
+    {
+        /* Add the WSA From */
+        $header = $this->locateHeader();
+
+        $nodeAddress = $this->soapDoc->createElementNS(self::WSANS, self::WSAPFX.':Address', $location);
+        $nodeFrom = $this->soapDoc->createElementNS(self::WSANS, self::WSAPFX.':From');
+        $nodeFrom->appendChild($nodeAddress);
+        $header->appendChild($nodeFrom);
+    }
+
     public function addTo($location)
     {
         /* Add the WSA To */
