@@ -16,7 +16,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://mateusz-sawit/wse-php"
+            "url": "https://github.com/mateusz-sawit/wse-php"
         }
     ],
     "license": "BSD-3-Clause",
