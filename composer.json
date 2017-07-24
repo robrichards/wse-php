@@ -1,7 +1,12 @@
 {
-    "name": "robrichards/wse-php",
+    "name": "mateusz-sawit/wse-php",
     "description": "Libraries for adding WS-* support to ext/soap in PHP.",
     "authors": [
+        {
+            "name": "SAWIT Mateusz Miklewski",
+            "homepage": "http://sawit.pl/",
+            "role": "Contributor developer"
+        },
         {
             "name": "Rob Richards",
             "homepage": "http://www.cdatazone.org/",
