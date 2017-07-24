@@ -13,12 +13,6 @@
             "role": "Main developer"
         }
     ],
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://mateusz-sawit/wse-php"
-        }
-    ],
     "license": "BSD-3-Clause",
     "keywords": [
         "SOAP",
