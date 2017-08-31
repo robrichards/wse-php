@@ -1,6 +1,12 @@
 wse-php
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, 2.0.2
+31 Aug 2017, 2.0.2
+- Features:
+- Add WSA From. Refs #29
+
+Improvements:
+- Allow xmlseclibs 2.x and 3.x
+- Remove composer lock file as too many varying deps being tested against
 
 09 Mar 2017, 2.0.1
 Improvements:
