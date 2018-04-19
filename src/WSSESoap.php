@@ -422,17 +422,23 @@ class WSSESoap
     {
         $enc = new XMLSecEnc();
 
-        $xpath = new DOMXPath($this->envelope->ownerDocument);
-        if ($encryptSignature == false) {
-            $nodes = $xpath->query('//*[local-name()="Body"]');
-        } else {
-            $nodes = $xpath->query('//*[local-name()="Signature"] | //*[local-name()="Body"]');
+        $elementToEncrypt = 'Body';
+        $isEncryptContent = false;
+        if (is_array($options) && !empty($options['ElementToEncrypt'])) {
+            $elementToEncrypt = $options['ElementToEncrypt']['name'];
+            $isEncryptContent = $options['ElementToEncrypt']['Content'];
         }
 
+        $xpath = new DOMXPath($this->envelope->ownerDocument);
+        if ($encryptSignature == false) {
+            $nodes = $xpath->query('//*[local-name()="' . $elementToEncrypt . '"]');
+        } else {
+            $nodes = $xpath->query('//*[local-name()="Signature"] | //*[local-name()="' . $elementToEncrypt . '"]');
+        }
         foreach ($nodes as $node) {
             $type = XMLSecEnc::Element;
             $name = $node->localName;
-            if ($name == 'Body') {
+            if ($name == 'Body' || ($name == $elementToEncrypt && $isEncryptContent)) {
                 $type = XMLSecEnc::Content;
             }
             $enc->addReference($name, $node, $type);
