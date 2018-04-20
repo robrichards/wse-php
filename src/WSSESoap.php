@@ -168,6 +168,7 @@ class WSSESoap
         }
 
         $nonceNode = $this->soapDoc->createElementNS(self::WSSENS,  self::WSSEPFX.':Nonce', base64_encode($nonce));
+        $nonceNode->setAttribute('EncodingType', "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary");
         $token->appendChild($nonceNode);
 
         $created = $this->soapDoc->createElementNS(self::WSUNS,  self::WSUPFX.':Created', $createdate);
