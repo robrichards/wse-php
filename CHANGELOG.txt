@@ -1,8 +1,12 @@
 wse-php
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, 1.1.1
+22 Jun 2018, 1.2.0
 Bug Fixes:
 - Add ValueType attribute when attaching token
+- Encode username and password correctly (peterh@giantrabbit.com)
+
+Features:
+- Add Composer support (giorgiosironi)
 
 24 Jun 2015, 1.1.0
 Features:
