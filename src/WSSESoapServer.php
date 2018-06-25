@@ -50,18 +50,58 @@ use RobRichards\XMLSecLibs\XMLSecurityDSig;
  */
 class WSSESoapServer
 {
+    /**
+     *
+     */
     const WSSENS = 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd';
+    /**
+     *
+     */
     const WSSENS_2003 = 'http://schemas.xmlsoap.org/ws/2003/06/secext';
+    /**
+     *
+     */
     const WSUNS = 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd';
+    /**
+     *
+     */
     const WSSEPFX = 'wsse';
+    /**
+     *
+     */
     const WSUPFX = 'wsu';
+    /**
+     * @var
+     */
+    /**
+     * @var
+     */
     private $soapNS, $soapPFX;
+    /**
+     * @var null
+     */
     private $soapDoc = null;
+    /**
+     * @var null
+     */
     private $envelope = null;
+    /**
+     * @var DOMXPath|null
+     */
     private $SOAPXPath = null;
+    /**
+     * @var null
+     */
     private $secNode = null;
+    /**
+     * @var bool
+     */
     public $signAllHeaders = false;
 
+    /**
+     * @param null $setActor
+     * @return null
+     */
     private function locateSecurityHeader($setActor = null)
     {
         $wsNamespace = null;
@@ -88,6 +128,10 @@ class WSSESoapServer
         return $wsNamespace;
     }
 
+    /**
+     * WSSESoapServer constructor.
+     * @param $doc
+     */
     public function __construct($doc)
     {
         $this->soapDoc = $doc;
@@ -103,6 +147,11 @@ class WSSESoapServer
         }
     }
 
+    /**
+     * @param $refNode
+     * @return bool
+     * @throws Exception
+     */
     public function processSignature($refNode)
     {
         $objXMLSecDSig = new XMLSecurityDSig();
@@ -140,12 +189,13 @@ class WSSESoapServer
                     if ($uri = $encmeth->getAttribute('URI')) {
                         $arUrl = parse_url($uri);
                         if (empty($arUrl['path']) && ($identifier = $arUrl['fragment'])) {
-                            $query = '//wswsse:BinarySecurityToken[@wswsu:Id="'.$identifier.'"]';
+                            $query = '//wswsse:BinarySecurityToken[@wswsu:Id="' . $identifier . '"]';
                             $nodeset = $this->SOAPXPath->query($query);
                             if ($encmeth = $nodeset->item(0)) {
                                 $x509cert = $encmeth->textContent;
                                 $x509cert = str_replace(array("\r", "\n"), '', $x509cert);
-                                $x509cert = "-----BEGIN CERTIFICATE-----\n".chunk_split($x509cert, 64, "\n")."-----END CERTIFICATE-----\n";
+                                $x509cert = "-----BEGIN CERTIFICATE-----\n" . chunk_split($x509cert, 64,
+                                        "\n") . "-----END CERTIFICATE-----\n";
                                 $objKey->loadKey($x509cert);
                                 break;
                             }
@@ -163,6 +213,10 @@ class WSSESoapServer
         return true;
     }
 
+    /**
+     * @return bool|void
+     * @throws Exception
+     */
     public function process()
     {
         if (empty($this->secNode)) {
@@ -190,11 +244,18 @@ class WSSESoapServer
         return true;
     }
 
+    /**
+     * @return mixed
+     */
     public function saveXML()
     {
         return $this->soapDoc->saveXML();
     }
 
+    /**
+     * @param $file
+     * @return mixed
+     */
     public function save($file)
     {
         return $this->soapDoc->save($file);
