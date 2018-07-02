@@ -153,11 +153,20 @@ class WSSESoap
      * @param $doc
      * @param bool $bMustUnderstand
      * @param null $setActor
+     * @param bool $signAllHeaders
+     * @param bool $signBody
      */
-    public function __construct($doc, $bMustUnderstand = true, $setActor = null)
-    {
+    public function __construct(
+        $doc,
+        $bMustUnderstand = true,
+        $setActor = null,
+        $signAllHeaders = false,
+        $signBody = true
+    ) {
         $this->soapDoc = $doc;
         $this->envelope = $doc->documentElement;
+        $this->signAllHeaders = $signAllHeaders;
+        $this->signBody = $signBody;
         $this->soapNS = $this->envelope->namespaceURI;
         $this->soapPFX = $this->envelope->prefix;
         $this->SOAPXPath = new DOMXPath($doc);
@@ -177,7 +186,7 @@ class WSSESoap
 
         $timestamp = $this->soapDoc->createElementNS(self::WSUNS, self::WSUPFX . ':Timestamp');
         if ($lastElement) {
-            $security->appendChile($timestamp);
+            $security->appendChild($timestamp);
         } else {
             $security->insertBefore($timestamp, $security->firstChild);
         }
@@ -265,10 +274,31 @@ class WSSESoap
     }
 
     /**
+     * @param $cert
+     * @param bool $isPEMFormat
+     * @param bool $isDSig
+     * @return mixed
+     */
+    public function addX509Certificate($cert, $isPEMFormat = true, $isDSig = true)
+    {
+        $security = $this->locateSecurityHeader();
+        $data = XMLSecurityDSig::get509XCert($cert, $isPEMFormat);
+
+        $token = $this->soapDoc->createElementNS(self::WSSENS, self::WSSEPFX . ':KeyIdentifier', $data);
+        $token->setAttribute('EncodingType',
+            'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary');
+        $token->setAttributeNS(self::WSUNS, self::WSUPFX . ':Id', XMLSecurityDSig::generateGUID());
+        $token->setAttribute('ValueType',
+            'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3');
+
+        return $token;
+    }
+
+    /**
      * @param $token
      * @throws Exception
      */
-    public function attachTokentoSig($token)
+    public function attachTokentoSig($token, $binaryToken = true)
     {
         if (!($token instanceof DOMElement)) {
             throw new Exception('Invalid parameter: BinarySecurityToken element expected');
@@ -285,13 +315,18 @@ class WSSESoap
                 $objDSig->appendChild($keyInfo);
             }
 
+
             $tokenRef = $this->soapDoc->createElementNS(self::WSSENS, self::WSSEPFX . ':SecurityTokenReference');
             $keyInfo->appendChild($tokenRef);
-            $reference = $this->soapDoc->createElementNS(self::WSSENS, self::WSSEPFX . ':Reference');
-            $reference->setAttribute('ValueType',
-                'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3');
-            $reference->setAttribute('URI', $tokenURI);
-            $tokenRef->appendChild($reference);
+            if ($binaryToken) {
+                $reference = $this->soapDoc->createElementNS(self::WSSENS, self::WSSEPFX . ':Reference');
+                $reference->setAttribute('ValueType',
+                    'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3');
+                $reference->setAttribute('URI', $tokenURI);
+                $tokenRef->appendChild($reference);
+            } else {//X509 cert
+                $tokenRef->appendChild($token);
+            }
         } else {
             throw new Exception('Unable to locate digital signature');
         }
@@ -307,7 +342,7 @@ class WSSESoap
 
         $objDSig->setCanonicalMethod(XMLSecurityDSig::EXC_C14N);
 
-        $arNodes = array();
+        $arNodes = [];
         foreach ($this->secNode->childNodes as $node) {
             if ($node->nodeType == XML_ELEMENT_NODE) {
                 $arNodes[] = $node;
@@ -337,7 +372,7 @@ class WSSESoap
             $algorithm = $options['algorithm'];
         }
 
-        $arOptions = array('prefix' => self::WSUPFX, 'prefix_ns' => self::WSUNS);
+        $arOptions = ['prefix' => self::WSUPFX, 'prefix_ns' => self::WSUNS];
         $objDSig->addReferenceList($arNodes, $algorithm, null, $arOptions);
 
         $objDSig->sign($objKey);
@@ -352,7 +387,7 @@ class WSSESoap
         if (is_array($options)) {
             if (!empty($options['KeyInfo'])) {
                 if (!empty($options['KeyInfo']['X509SubjectKeyIdentifier'])) {
-                    $sigNode = $this->secNode->firstChild->nextSibling;
+                    $sigNode = $this->secNode->firstChild;
                     $objDoc = $sigNode->ownerDocument;
                     $keyInfo = $sigNode->ownerDocument->createElementNS(XMLSecurityDSig::XMLDSIGNS, 'ds:KeyInfo');
                     $sigNode->appendChild($keyInfo);
@@ -584,7 +619,7 @@ class WSSESoap
 
         $nodes = $xpath->query('/soapns:Envelope/soapns:Header/*[local-name()="Security"]/soapenc:EncryptedKey');
 
-        $references = array();
+        $references = [];
         if ($node = $nodes->item(0)) {
             $objenc = new XMLSecEnc();
             $objenc->setNode($node);
