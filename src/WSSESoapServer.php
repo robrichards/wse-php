@@ -55,14 +55,14 @@ class WSSESoapServer
     const WSUNS = 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd';
     const WSSEPFX = 'wsse';
     const WSUPFX = 'wsu';
-    private $soapNS, $soapPFX;
-    private $soapDoc = null;
-    private $envelope = null;
-    private $SOAPXPath = null;
-    private $secNode = null;
+    protected $soapNS, $soapPFX;
+    protected $soapDoc = null;
+    protected $envelope = null;
+    protected $SOAPXPath = null;
+    protected $secNode = null;
     public $signAllHeaders = false;
 
-    private function locateSecurityHeader($setActor = null)
+    protected function locateSecurityHeader($setActor = null)
     {
         $wsNamespace = null;
         if ($this->secNode == null) {

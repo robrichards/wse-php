@@ -50,14 +50,14 @@ class WSASoap
 {
     const WSANS = 'http://schemas.xmlsoap.org/ws/2004/08/addressing';
     const WSAPFX = 'wsa';
-    private $soapNS, $soapPFX;
-    private $soapDoc = null;
-    private $envelope = null;
-    private $SOAPXPath = null;
-    private $header = null;
-    private $messageID = null;
+    protected $soapNS, $soapPFX;
+    protected $soapDoc = null;
+    protected $envelope = null;
+    protected $SOAPXPath = null;
+    protected $header = null;
+    protected $messageID = null;
 
-    private function locateHeader()
+    protected function locateHeader()
     {
         if ($this->header == null) {
             $headers = $this->SOAPXPath->query('//wssoap:Envelope/wssoap:Header');
