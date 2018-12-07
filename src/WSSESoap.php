@@ -224,16 +224,44 @@ class WSSESoap
         $objDSig->setCanonicalMethod(XMLSecurityDSig::EXC_C14N);
 
         $arNodes = array();
+
+
+//        $options['signSpecificHeaders'] = [
+//            WSSESoap::WSUNS => [
+//               'Timestamp' => true
+//            ],
+//            WSASoap::WSANS_2005 => [
+//                'To' => true
+//            ]
+//        ];
+        $signSpecificHeaders = $options['signSpecificHeaders'];
+
         foreach ($this->secNode->childNodes as $node) {
-            if ($node->nodeType == XML_ELEMENT_NODE) {
-                $arNodes[] = $node;
+            if ($node->nodeType != XML_ELEMENT_NODE) {
+                continue;
             }
+
+            if (!empty($signSpecificHeaders) && !isset($signSpecificHeaders[$node->namespaceURI][$node->localName])) {
+                // Node is not in whitelisted list of headers to sign, skip it
+                continue;
+            }
+
+            $arNodes[] = $node;
         }
 
-        if ($this->signAllHeaders) {
+        if ($this->signAllHeaders || !empty($signSpecificHeaders)) {
             foreach ($this->secNode->parentNode->childNodes as $node) {
-                if (($node->nodeType == XML_ELEMENT_NODE) &&
-                    ($node->namespaceURI != self::WSSENS)) {
+
+                if ($node->nodeType != XML_ELEMENT_NODE) {
+                    continue;
+                }
+
+                if (!empty($signSpecificHeaders) && !isset($signSpecificHeaders[$node->namespaceURI][$node->localName])) {
+                    // Node is not in whitelisted list of headers to sign, skip it
+                    continue;
+                }
+
+                if ($node->namespaceURI != self::WSSENS) {
                     $arNodes[] = $node;
                 }
             }
