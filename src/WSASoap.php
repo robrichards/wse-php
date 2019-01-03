@@ -44,7 +44,7 @@ use RobRichards\XMLSecLibs\XMLSecurityDSig;
  * @copyright 2007-2019 Robert Richards <rrichards@ctindustries.net>
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  *
- * @version   2.0.3
+ * @version   2.0.4-dev
  */
 class WSASoap
 {

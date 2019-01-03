@@ -1,5 +1,7 @@
 wse-php
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? ????, 2.0.4
+
 03 Jan 2019, 2.0.3
 Improvements:
 - Change private properties to protected, so it can be extended. Refs #41
