@@ -58,11 +58,11 @@ class WSSESoap
     const WSUNAME = 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0';
     const WSSEPFX = 'wsse';
     const WSUPFX = 'wsu';
-    private $soapNS, $soapPFX;
-    private $soapDoc = null;
-    private $envelope = null;
-    private $SOAPXPath = null;
-    private $secNode = null;
+    protected $soapNS, $soapPFX;
+    protected $soapDoc = null;
+    protected $envelope = null;
+    protected $SOAPXPath = null;
+    protected $secNode = null;
     public $signAllHeaders = false;
     public $signBody = true;
 
@@ -452,11 +452,13 @@ class WSSESoap
         $privKey = null;
         $privKey_isFile = false;
         $privKey_isCert = false;
+        $privKey_passphrase = '';
 
         if (is_array($options)) {
             $privKey = (!empty($options['keys']['private']['key']) ? $options['keys']['private']['key'] : null);
             $privKey_isFile = (!empty($options['keys']['private']['isFile']) ? true : false);
             $privKey_isCert = (!empty($options['keys']['private']['isCert']) ? true : false);
+            $privKey_passphrase = (!empty($options['keys']['private']['passphrase']) ? $options['keys']['private']['passphrase'] : '');
         }
 
         $objenc = new XMLSecEnc();
@@ -480,6 +482,7 @@ class WSSESoap
             XMLSecEnc::staticLocateKeyInfo($objKey, $node);
             if ($objKey && $objKey->isEncrypted) {
                 $objencKey = $objKey->encryptedCtx;
+                $objKey->passphrase = $privKey_passphrase;
                 $objKey->loadKey($privKey, $privKey_isFile, $privKey_isCert);
                 $key = $objencKey->decryptKey($objKey);
                 $objKey->loadKey($key);
