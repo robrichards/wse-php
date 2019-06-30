@@ -1,9 +1,18 @@
 wse-php
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, 2.0.3-dev
+?? ??? ????, 2.0.4
+
+03 Jan 2019, 2.0.3
+Improvements:
+- Change private properties to protected, so it can be extended. Refs #41
+- Add private key passphrase option to decryptSoapDoc. Refs #40
+- Adding option to use 2005 NS in WSA headers. Refs #46
+
+Features:
+- Adds support for WSA RelatesTo. Refs #45
 
 31 Aug 2017, 2.0.2
-- Features:
+Features:
 - Add WSA From. Refs #29
 
 Improvements:

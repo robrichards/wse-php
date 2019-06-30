@@ -13,7 +13,7 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
 /**
  * WSSESoap.php.
  *
- * Copyright (c) 2007-2017, Robert Richards <rrichards@ctindustries.net>.
+ * Copyright (c) 2007-2019, Robert Richards <rrichards@ctindustries.net>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,10 +46,10 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @author    Robert Richards <rrichards@ctindustries.net>
- * @copyright 2007-2017 Robert Richards <rrichards@ctindustries.net>
+ * @copyright 2007-2019 Robert Richards <rrichards@ctindustries.net>
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  *
- * @version   2.0.3-dev
+ * @version   2.0.4-dev
  */
 class WSSESoap
 {
@@ -73,33 +73,37 @@ class WSSESoap
      *
      */
     const WSUPFX = 'wsu';
-    /**
-     * @var
-     */
+
     /**
      * @var
      */
     private $soapNS, $soapPFX;
+
     /**
      * @var null
      */
     private $soapDoc = null;
+
     /**
      * @var null
      */
     private $envelope = null;
+
     /**
      * @var DOMXPath|null
      */
     private $SOAPXPath = null;
+
     /**
      * @var null
      */
     private $secNode = null;
+
     /**
      * @var bool
      */
     public $signAllHeaders = false;
+
     /**
      * @var bool
      */
@@ -342,17 +346,44 @@ class WSSESoap
 
         $objDSig->setCanonicalMethod(XMLSecurityDSig::EXC_C14N);
 
-        $arNodes = [];
+        $arNodes = array();
+
+//        $options['signSpecificHeaders'] = [
+//            WSSESoap::WSUNS => [
+//               'Timestamp' => true
+//            ],
+//            WSASoap::WSANS_2005 => [
+//                'To' => true
+//            ]
+//        ];
+        $signSpecificHeaders = $options['signSpecificHeaders'];
+
         foreach ($this->secNode->childNodes as $node) {
-            if ($node->nodeType == XML_ELEMENT_NODE) {
-                $arNodes[] = $node;
+            if ($node->nodeType != XML_ELEMENT_NODE) {
+                continue;
             }
+
+            if (!empty($signSpecificHeaders) && !isset($signSpecificHeaders[$node->namespaceURI][$node->localName])) {
+                // Node is not in whitelisted list of headers to sign, skip it
+                continue;
+            }
+
+            $arNodes[] = $node;
         }
 
-        if ($this->signAllHeaders) {
+        if ($this->signAllHeaders || !empty($signSpecificHeaders)) {
             foreach ($this->secNode->parentNode->childNodes as $node) {
-                if (($node->nodeType == XML_ELEMENT_NODE) &&
-                    ($node->namespaceURI != self::WSSENS)) {
+
+                if ($node->nodeType != XML_ELEMENT_NODE) {
+                    continue;
+                }
+
+                if (!empty($signSpecificHeaders) && !isset($signSpecificHeaders[$node->namespaceURI][$node->localName])) {
+                    // Node is not in whitelisted list of headers to sign, skip it
+                    continue;
+                }
+
+                if ($node->namespaceURI != self::WSSENS) {
                     $arNodes[] = $node;
                 }
             }
@@ -603,11 +634,13 @@ class WSSESoap
         $privKey = null;
         $privKey_isFile = false;
         $privKey_isCert = false;
+        $privKey_passphrase = '';
 
         if (is_array($options)) {
             $privKey = (!empty($options['keys']['private']['key']) ? $options['keys']['private']['key'] : null);
             $privKey_isFile = (!empty($options['keys']['private']['isFile']) ? true : false);
             $privKey_isCert = (!empty($options['keys']['private']['isCert']) ? true : false);
+            $privKey_passphrase = (!empty($options['keys']['private']['passphrase']) ? $options['keys']['private']['passphrase'] : '');
         }
 
         $objenc = new XMLSecEnc();
@@ -631,6 +664,7 @@ class WSSESoap
             XMLSecEnc::staticLocateKeyInfo($objKey, $node);
             if ($objKey && $objKey->isEncrypted) {
                 $objencKey = $objKey->encryptedCtx;
+                $objKey->passphrase = $privKey_passphrase;
                 $objKey->loadKey($privKey, $privKey_isFile, $privKey_isCert);
                 $key = $objencKey->decryptKey($objKey);
                 $objKey->loadKey($key);
