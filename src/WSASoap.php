@@ -62,7 +62,7 @@ class WSASoap
      *
      */
     const WSAPFX = 'wsa';
-    
+
     /**
      * @var
      */

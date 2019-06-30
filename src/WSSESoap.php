@@ -356,7 +356,7 @@ class WSSESoap
 //                'To' => true
 //            ]
 //        ];
-        $signSpecificHeaders = $options['signSpecificHeaders'];
+        $signSpecificHeaders = $options['signSpecificHeaders'] ?? null;
 
         foreach ($this->secNode->childNodes as $node) {
             if ($node->nodeType != XML_ELEMENT_NODE) {
