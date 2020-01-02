@@ -19,7 +19,7 @@ class MySoap extends SoapClient
         $objWSSE = new WSSESoap($doc);
 
         /* add Timestamp with no expiration timestamp */
-        $objWSSE->addTimestamp();
+        $objWSSE->addTimestamp(null);
 
         /* create new XMLSec Key using AES256_CBC and type is private key */
         $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, array('type' => 'private'));
