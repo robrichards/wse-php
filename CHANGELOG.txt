@@ -4,6 +4,10 @@ wse-php
 Improvements:
 - Add support for variable WSA NS in RelatesTo field. PR #55
 - Add missing EncodingType attribute in addUserToken. PR #36
+- Make it possible to only sign specific header nodes. PR #47
+
+Bug Fixes:
+- Fix undefined index notice. Refs #48
 
 03 Jan 2019, 2.0.3
 Improvements:
