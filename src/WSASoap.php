@@ -165,7 +165,7 @@ class WSASoap
     {
         $header = $this->locateHeader();
 
-        $nodeRelatesTo = $this->soapDoc->createElementNS(self::WSANS, self::WSAPFX . ':RelatesTo', $originalMessageId);
+        $nodeRelatesTo = $this->soapDoc->createElementNS($this->ns, self::WSAPFX . ':RelatesTo', $originalMessageId);
         $header->appendChild($nodeRelatesTo);
     }
 
