@@ -1,6 +1,9 @@
 wse-php
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, 2.0.4
+11 May 2020, 2.0.4
+Improvements:
+- Add support for variable WSA NS in RelatesTo field. PR #55
+- Add missing EncodingType attribute in addUserToken. PR #36
 
 03 Jan 2019, 2.0.3
 Improvements:
