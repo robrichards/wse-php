@@ -66,10 +66,10 @@ class WSSESoapServer
     {
         $wsNamespace = null;
         if ($this->secNode == null) {
+            $secnode = null;
             $headers = $this->SOAPXPath->query('//wssoap:Envelope/wssoap:Header');
             if ($header = $headers->item(0)) {
                 $secnodes = $this->SOAPXPath->query('./*[local-name()="Security"]', $header);
-                $secnode = null;
                 foreach ($secnodes as $node) {
                     $nsURI = $node->namespaceURI;
                     if (($nsURI == self::WSSENS) || ($nsURI == self::WSSENS_2003)) {
