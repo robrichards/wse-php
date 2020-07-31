@@ -1,5 +1,5 @@
 {
-    "name": "Keyur1991/wse-php",
+    "name": "keyur1991/wse-php",
     "description": "Libraries for adding WS-* support to ext/soap in PHP.",
     "authors": [{
             "name": "Rob Richards",
