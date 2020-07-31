@@ -1,26 +1,30 @@
 {
-	"name" : "robrichards/wse-php",
-	"description" : "Libraries for adding WS-* support to ext/soap in PHP.",
-	"authors" : [{
-			"name" : "Rob Richards",
-			"homepage" : "http://www.cdatazone.org/",
-			"role" : "Main developer"
-		}
-	],
-	"license" : "BSD-3-Clause",
-	"keywords" : [
-		"SOAP",
-		"WS-Addressing",
-		"WS-Security"
-	],
-	"homepage" : "https://github.com/robrichards/wse-php",
-	"autoload" : {
-		"psr-4" : {
-			"RobRichards\\WsePhp\\" : "src"
-		}
-	},
-	"require" : {
-		"php" : ">= 5.3",
-		"robrichards/xmlseclibs" : ">=3.0.4"
-	}
+    "name": "Keyur1991/wse-php",
+    "description": "Libraries for adding WS-* support to ext/soap in PHP.",
+    "authors": [{
+            "name": "Rob Richards",
+            "homepage": "http://www.cdatazone.org/",
+            "role": "Main developer"
+        },
+        {
+            "name": "Keyur Panchal",
+            "role": "Contributor"
+        }
+    ],
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "SOAP",
+        "WS-Addressing",
+        "WS-Security"
+    ],
+    "homepage": "https://github.com/Keyur1991/wse-php",
+    "autoload": {
+        "psr-4": {
+            "RobRichards\\WsePhp\\": "src"
+        }
+    },
+    "require": {
+        "php": ">= 5.3",
+        "robrichards/xmlseclibs": ">=3.0.4"
+    }
 }
