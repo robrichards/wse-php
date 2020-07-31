@@ -190,7 +190,16 @@ class WSSESoap
         return $token;
     }
 
-    public function attachTokentoSig($token)
+    public function addSamlToken($samlToken)
+    {
+        $token = dom_import_simplexml(simplexml_load_string($samlToken));
+        $token = $this->soapDoc->importNode($token, true);
+        $security = $this->locateSecurityHeader();
+        $token = $security->insertBefore($token, $security->firstChild);
+        return $token;
+    }
+
+    public function attachTokentoSig($token, $isSamlToken = false)
     {
         if (!($token instanceof DOMElement)) {
             throw new Exception('Invalid parameter: BinarySecurityToken element expected');
@@ -209,9 +218,15 @@ class WSSESoap
 
             $tokenRef = $this->soapDoc->createElementNS(self::WSSENS, self::WSSEPFX.':SecurityTokenReference');
             $keyInfo->appendChild($tokenRef);
-            $reference = $this->soapDoc->createElementNS(self::WSSENS, self::WSSEPFX.':Reference');
-            $reference->setAttribute('ValueType', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3');
-            $reference->setAttribute('URI', $tokenURI);
+
+            if ($isSamlToken) {
+                $reference = $this->soapDoc->createElementNS(self::WSSENS, self::WSSEPFX.':KeyIdentifier', $token->getAttribute('AssertionID'));
+                $reference->setAttribute('ValueType', 'http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.0#SAMLAssertionID');
+            } else {
+                $reference = $this->soapDoc->createElementNS(self::WSSENS, self::WSSEPFX.':Reference');
+                $reference->setAttribute('ValueType', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3');
+                $reference->setAttribute('URI', $tokenURI);
+            }
             $tokenRef->appendChild($reference);
         } else {
             throw new Exception('Unable to locate digital signature');
