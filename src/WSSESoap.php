@@ -13,7 +13,7 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
 /**
  * WSSESoap.php.
  *
- * Copyright (c) 2007-2016, Robert Richards <rrichards@ctindustries.net>.
+ * Copyright (c) 2007-2020, Robert Richards <rrichards@ctindustries.net>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,10 +46,10 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @author    Robert Richards <rrichards@ctindustries.net>
- * @copyright 2007-2016 Robert Richards <rrichards@ctindustries.net>
+ * @copyright 2007-2020 Robert Richards <rrichards@ctindustries.net>
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  *
- * @version   2.0.1-dev
+ * @version   2.0.4
  */
 class WSSESoap
 {
@@ -58,11 +58,11 @@ class WSSESoap
     const WSUNAME = 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0';
     const WSSEPFX = 'wsse';
     const WSUPFX = 'wsu';
-    private $soapNS, $soapPFX;
-    private $soapDoc = null;
-    private $envelope = null;
-    private $SOAPXPath = null;
-    private $secNode = null;
+    protected $soapNS, $soapPFX;
+    protected $soapDoc = null;
+    protected $envelope = null;
+    protected $SOAPXPath = null;
+    protected $secNode = null;
     public $signAllHeaders = false;
     public $signBody = true;
 
@@ -168,6 +168,7 @@ class WSSESoap
         }
 
         $nonceNode = $this->soapDoc->createElementNS(self::WSSENS,  self::WSSEPFX.':Nonce', base64_encode($nonce));
+        $nonceNode->setAttribute('EncodingType', "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary");
         $token->appendChild($nonceNode);
 
         $created = $this->soapDoc->createElementNS(self::WSUNS,  self::WSUPFX.':Created', $createdate);
@@ -261,16 +262,44 @@ class WSSESoap
         $objDSig->setCanonicalMethod(XMLSecurityDSig::EXC_C14N);
 
         $arNodes = array();
+
+
+//        $options['signSpecificHeaders'] = [
+//            WSSESoap::WSUNS => [
+//               'Timestamp' => true
+//            ],
+//            WSASoap::WSANS_2005 => [
+//                'To' => true
+//            ]
+//        ];
+        $signSpecificHeaders = (isset($options['signSpecificHeaders']) ? $options['signSpecificHeaders'] : null);
+
         foreach ($this->secNode->childNodes as $node) {
-            if ($node->nodeType == XML_ELEMENT_NODE) {
-                $arNodes[] = $node;
+            if ($node->nodeType != XML_ELEMENT_NODE) {
+                continue;
             }
+
+            if (!empty($signSpecificHeaders) && !isset($signSpecificHeaders[$node->namespaceURI][$node->localName])) {
+                // Node is not in whitelisted list of headers to sign, skip it
+                continue;
+            }
+
+            $arNodes[] = $node;
         }
 
-        if ($this->signAllHeaders) {
+        if ($this->signAllHeaders || !empty($signSpecificHeaders)) {
             foreach ($this->secNode->parentNode->childNodes as $node) {
-                if (($node->nodeType == XML_ELEMENT_NODE) &&
-                    ($node->namespaceURI != self::WSSENS)) {
+
+                if ($node->nodeType != XML_ELEMENT_NODE) {
+                    continue;
+                }
+
+                if (!empty($signSpecificHeaders) && !isset($signSpecificHeaders[$node->namespaceURI][$node->localName])) {
+                    // Node is not in whitelisted list of headers to sign, skip it
+                    continue;
+                }
+
+                if ($node->namespaceURI != self::WSSENS) {
                     $arNodes[] = $node;
                 }
             }
@@ -489,11 +518,13 @@ class WSSESoap
         $privKey = null;
         $privKey_isFile = false;
         $privKey_isCert = false;
+        $privKey_passphrase = '';
 
         if (is_array($options)) {
             $privKey = (!empty($options['keys']['private']['key']) ? $options['keys']['private']['key'] : null);
             $privKey_isFile = (!empty($options['keys']['private']['isFile']) ? true : false);
             $privKey_isCert = (!empty($options['keys']['private']['isCert']) ? true : false);
+            $privKey_passphrase = (!empty($options['keys']['private']['passphrase']) ? $options['keys']['private']['passphrase'] : '');
         }
 
         $objenc = new XMLSecEnc();
@@ -517,6 +548,7 @@ class WSSESoap
             XMLSecEnc::staticLocateKeyInfo($objKey, $node);
             if ($objKey && $objKey->isEncrypted) {
                 $objencKey = $objKey->encryptedCtx;
+                $objKey->passphrase = $privKey_passphrase;
                 $objKey->loadKey($privKey, $privKey_isFile, $privKey_isCert);
                 $key = $objencKey->decryptKey($objKey);
                 $objKey->loadKey($key);

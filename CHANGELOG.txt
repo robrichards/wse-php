@@ -1,6 +1,30 @@
 wse-php
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, 2.0.2
+11 May 2020, 2.0.4
+Improvements:
+- Add support for variable WSA NS in RelatesTo field. PR #55
+- Add missing EncodingType attribute in addUserToken. PR #36
+- Make it possible to only sign specific header nodes. PR #47
+
+Bug Fixes:
+- Fix undefined index notice. Refs #48
+
+03 Jan 2019, 2.0.3
+Improvements:
+- Change private properties to protected, so it can be extended. Refs #41
+- Add private key passphrase option to decryptSoapDoc. Refs #40
+- Adding option to use 2005 NS in WSA headers. Refs #46
+
+Features:
+- Adds support for WSA RelatesTo. Refs #45
+
+31 Aug 2017, 2.0.2
+Features:
+- Add WSA From. Refs #29
+
+Improvements:
+- Allow xmlseclibs 2.x and 3.x
+- Remove composer lock file as too many varying deps being tested against
 
 09 Mar 2017, 2.0.1
 Improvements:

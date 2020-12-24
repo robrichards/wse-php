@@ -10,7 +10,7 @@ use RobRichards\XMLSecLibs\XMLSecurityDSig;
 /**
  * WSSESoapServer.php.
  *
- * Copyright (c) 2007-2016, Robert Richards <rrichards@ctindustries.net>.
+ * Copyright (c) 2007-2020, Robert Richards <rrichards@ctindustries.net>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,10 +43,10 @@ use RobRichards\XMLSecLibs\XMLSecurityDSig;
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @author    Robert Richards <rrichards@ctindustries.net>
- * @copyright 2007-2016 Robert Richards <rrichards@ctindustries.net>
+ * @copyright 2007-2020 Robert Richards <rrichards@ctindustries.net>
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  *
- * @version   2.0.1-dev
+ * @version   2.0.4
  */
 class WSSESoapServer
 {
@@ -66,10 +66,10 @@ class WSSESoapServer
     {
         $wsNamespace = null;
         if ($this->secNode == null) {
+            $secnode = null;
             $headers = $this->SOAPXPath->query('//wssoap:Envelope/wssoap:Header');
             if ($header = $headers->item(0)) {
                 $secnodes = $this->SOAPXPath->query('./*[local-name()="Security"]', $header);
-                $secnode = null;
                 foreach ($secnodes as $node) {
                     $nsURI = $node->namespaceURI;
                     if (($nsURI == self::WSSENS) || ($nsURI == self::WSSENS_2003)) {
