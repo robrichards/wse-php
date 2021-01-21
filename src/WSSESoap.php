@@ -218,6 +218,43 @@ class WSSESoap
         }
     }
 
+    public function attachX509DatatoSig($options)
+    {
+        $objXMLSecDSig = new XMLSecurityDSig();
+        if ($objDSig = $objXMLSecDSig->locateSignature($this->soapDoc)) {
+            $this->SOAPXPath->registerNamespace('secdsig', XMLSecurityDSig::XMLDSIGNS);
+            $query = './secdsig:KeyInfo';
+            $nodeset = $this->SOAPXPath->query($query, $objDSig);
+            $keyInfo = $nodeset->item(0);
+            if (!$keyInfo) {
+                $keyInfo = $objXMLSecDSig->createNewSignNode('KeyInfo');
+                $objDSig->appendChild($keyInfo);
+            }
+
+            $tokenRef = $this->soapDoc->createElementNS(self::WSSENS, self::WSSEPFX.':SecurityTokenReference');
+            $keyInfo->appendChild($tokenRef);
+            
+            $X509Data = $this->soapDoc->createElementNS(XMLSecurityDSig::XMLDSIGNS, 'ds:X509Data');
+            $tokenRef->appendChild($X509Data);
+            $issuerSerial = $this->soapDoc->createElementNS(XMLSecurityDSig::XMLDSIGNS, 'ds:X509IssuerSerial');
+            $X509Data->appendChild($issuerSerial);
+            if(isset($options['KeyInfo']['X509Data']['IssuerName'])) {
+                $issuerName = $this->soapDoc->createElementNS(XMLSecurityDSig::XMLDSIGNS, 'ds:X509IssuerName');
+                $dataNode = new DOMText($options['KeyInfo']['X509Data']['IssuerName']);
+                $issuerName->appendChild($dataNode);
+                $issuerSerial->appendChild($issuerName);
+            }
+            if(isset($options['KeyInfo']['X509Data']['SerialNumber'])) {
+                $serialNumber = $this->soapDoc->createElementNS(XMLSecurityDSig::XMLDSIGNS, 'ds:X509SerialNumber');
+                $dataNode = new DOMText($options['KeyInfo']['X509Data']['SerialNumber']);
+                $serialNumber->appendChild($dataNode);
+                $issuerSerial->appendChild($serialNumber);
+            }
+        } else {
+            throw new Exception('Unable to locate digital signature');
+        }
+    }
+
     public function signSoapDoc($objKey, $options = null)
     {
         $objDSig = new XMLSecurityDSig();
