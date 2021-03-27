@@ -175,6 +175,19 @@ class WSSESoap
         $token->appendChild($created);
     }
 
+    public function generateX509Token($cert, $isPEMFormat = true)
+    {
+        $data = XMLSecurityDSig::get509XCert($cert, $isPEMFormat);
+
+        $token = $this->soapDoc->createElementNS(self::WSSENS, self::WSSEPFX.':KeyIdentifier', $data);
+
+        $token->setAttribute('EncodingType', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary');
+        $token->setAttributeNS(self::WSUNS, self::WSUPFX.':Id', XMLSecurityDSig::generateGUID());
+        $token->setAttribute('ValueType', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3');
+
+        return $token;
+    }
+
     public function addBinaryToken($cert, $isPEMFormat = true, $isDSig = true)
     {
         $security = $this->locateSecurityHeader();
@@ -193,7 +206,7 @@ class WSSESoap
     public function attachTokentoSig($token)
     {
         if (!($token instanceof DOMElement)) {
-            throw new Exception('Invalid parameter: BinarySecurityToken element expected');
+            throw new Exception('Invalid parameter: DOMElement expected');
         }
         $objXMLSecDSig = new XMLSecurityDSig();
         if ($objDSig = $objXMLSecDSig->locateSignature($this->soapDoc)) {
@@ -209,9 +222,13 @@ class WSSESoap
 
             $tokenRef = $this->soapDoc->createElementNS(self::WSSENS, self::WSSEPFX.':SecurityTokenReference');
             $keyInfo->appendChild($tokenRef);
-            $reference = $this->soapDoc->createElementNS(self::WSSENS, self::WSSEPFX.':Reference');
-            $reference->setAttribute('ValueType', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3');
-            $reference->setAttribute('URI', $tokenURI);
+            if ('KeyIdentifier' == $token->localName) {
+                $reference = $token;
+            } else {
+                $reference = $this->soapDoc->createElementNS(self::WSSENS, self::WSSEPFX.':Reference');
+                $reference->setAttribute('ValueType', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3');
+                $reference->setAttribute('URI', $tokenURI);
+            }
             $tokenRef->appendChild($reference);
         } else {
             throw new Exception('Unable to locate digital signature');
@@ -337,15 +354,17 @@ class WSSESoap
             return true;
         }
 
+        /** @var DOMElement|null $lastToken */
         $lastToken = null;
         $findTokens = $security->firstChild;
         while ($findTokens) {
-            if ($findTokens->localName == 'BinarySecurityToken') {
+            if (in_array($findTokens->localName, ['BinarySecurityToken', 'Signature'])) {
                 $lastToken = $findTokens;
+                break;
             }
             $findTokens = $findTokens->nextSibling;
         }
-        if ($lastToken) {
+        if ('BinarySecurityToken' == $lastToken->localName) {
             $lastToken = $lastToken->nextSibling;
         }
 
@@ -387,9 +406,13 @@ class WSSESoap
             }
         }
 
-        $tokenURI = '#'.$token->getAttributeNS(self::WSUNS, 'Id');
-        $reference = $objDoc->createElementNS(self::WSSENS, self::WSSEPFX.':Reference');
-        $reference->setAttribute('URI', $tokenURI);
+        if ('KeyIdentifier' == $token->localName) {
+            $reference = $token;
+        } else {
+            $tokenURI = '#'.$token->getAttributeNS(self::WSUNS, 'Id');
+            $reference = $objDoc->createElementNS(self::WSSENS, self::WSSEPFX.':Reference');
+            $reference->setAttribute('URI', $tokenURI);
+        }
         $tokenRef->appendChild($reference);
 
         return true;
