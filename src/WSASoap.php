@@ -140,6 +140,7 @@ class WSASoap
         $nodeID = $this->soapDoc->createElementNS($this->ns, self::WSAPFX.':MessageID', $id);
         $header->appendChild($nodeID);
         $this->messageID = $id;
+        return $id;
     }
 
     public function addReplyTo($address = null)
