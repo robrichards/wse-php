@@ -11,19 +11,19 @@ class MySoap extends SoapClient
 {
 
     /** @var string $username */
-    private string $username;
+    private $username;
 
     /** @var null|string $password */
-    private ?string $password;
+    private $password;
 
     /** @var bool $digest */
-    private bool $digest;
+    private $digest;
 
     /** @var bool $addNonce */
-    private bool $addNonce;
+    private $addNonce;
 
     /** @var bool $addCreated */
-    private bool $addCreated;
+    private $addCreated;
 
     /**
      * addUserToken
