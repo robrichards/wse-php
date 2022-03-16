@@ -2,6 +2,7 @@
 
 namespace RobRichards\WsePhp;
 
+use DOMDocument;
 use DOMElement;
 use DOMText;
 use DOMXPath;
@@ -58,14 +59,39 @@ class WSSESoap
     const WSUNAME = 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0';
     const WSSEPFX = 'wsse';
     const WSUPFX = 'wsu';
-    protected $soapNS, $soapPFX;
+
+    /** @var string $soapNS */
+    protected $soapNS;
+
+    /** @var string $soapPFX */
+    protected $soapPFX;
+
+    /** @var null|DOMDocument $soapDoc */
     protected $soapDoc = null;
+
+    /** @var null|DOMElement $envelope */
     protected $envelope = null;
+
+    /** @var null|DOMXPath $SOAPXPath */
     protected $SOAPXPath = null;
+
+    /** @var null|DOMElement $secNode */
     protected $secNode = null;
+
+    /** @var bool $signAllHeaders */
     public $signAllHeaders = false;
+
+    /** @var bool $signBody */
     public $signBody = true;
 
+    /**
+     * locateSecurityHeader
+     *
+     * @param bool $bMustUnderstand
+     * @param null|string $setActor
+     *
+     * @return DOMElement
+     */
     private function locateSecurityHeader($bMustUnderstand = true, $setActor = null)
     {
         if ($this->secNode == null) {
@@ -104,6 +130,15 @@ class WSSESoap
         return $this->secNode;
     }
 
+    /**
+     * constructor
+     *
+     * @param \DOMDocument $doc
+     * @param bool $bMustUnderstand
+     * @param null| $setActor
+     *
+     * @return void
+     */
     public function __construct($doc, $bMustUnderstand = true, $setActor = null)
     {
         $this->soapDoc = $doc;
@@ -221,6 +256,13 @@ class WSSESoap
         return $token;
     }
 
+    /**
+     * attachTokentoSig
+     *
+     * @param DOMElement $token
+     *
+     * @return void
+     */
     public function attachTokentoSig($token)
     {
         if (!($token instanceof DOMElement)) {
@@ -249,6 +291,14 @@ class WSSESoap
         }
     }
 
+    /**
+     * signSoapDoc
+     *
+     * @param XMLSecurityKey $objKey
+     * @param null|array $options
+     *
+     * @return void
+     */
     public function signSoapDoc($objKey, $options = null)
     {
         $objDSig = new XMLSecurityDSig();
@@ -426,6 +476,14 @@ class WSSESoap
         return true;
     }
 
+    /**
+     * AddReference
+     *
+     * @param DOMElement $baseNode
+     * @param string $guid
+     *
+     * @return void
+     */
     public function AddReference($baseNode, $guid)
     {
         $refList = null;
@@ -574,11 +632,23 @@ class WSSESoap
         return true;
     }
 
+    /**
+     * saveXML
+     *
+     * @return string
+     */
     public function saveXML()
     {
         return $this->soapDoc->saveXML();
     }
 
+    /**
+     * save
+     *
+     * @param string $file
+     *
+     * @return int|false
+     */
     public function save($file)
     {
         return $this->soapDoc->save($file);
