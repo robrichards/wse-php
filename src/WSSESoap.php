@@ -116,6 +116,13 @@ class WSSESoap
         $this->locateSecurityHeader($bMustUnderstand, $setActor);
     }
 
+    /**
+     * add Timestamp to Security header
+     *
+     * @param int $secondsToExpire
+     *
+     * @return void
+     */
     public function addTimestamp($secondsToExpire = 3600)
     {
         /* Add the WSU timestamps */
@@ -132,6 +139,17 @@ class WSSESoap
         }
     }
 
+    /**
+     * add UsernameToken to Security header
+     *
+     * @param string $userName
+     * @param string $password
+     * @param bool $passwordDigest
+     * @param bool $addNonce add Nonce item
+     * @param bool $addCreated add Created item
+     *
+     * @return void
+     */
     public function addUserToken($userName, $password = null, $passwordDigest = false, $addNonce = true, $addCreated = true)
     {
         if ($passwordDigest && empty($password)) {
@@ -179,6 +197,15 @@ class WSSESoap
         }
     }
 
+    /**
+     * add BinaryToken to Security header
+     *
+     * @param mixed $cert
+     * @param bool $isPEMFormat
+     * @param bool $isDSig
+     *
+     * @return DOMElement|false
+     */
     public function addBinaryToken($cert, $isPEMFormat = true, $isDSig = true)
     {
         $security = $this->locateSecurityHeader();
