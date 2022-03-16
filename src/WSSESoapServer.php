@@ -140,12 +140,12 @@ class WSSESoapServer
                     if ($uri = $encmeth->getAttribute('URI')) {
                         $arUrl = parse_url($uri);
                         if (empty($arUrl['path']) && ($identifier = $arUrl['fragment'])) {
-                            $query = '//wswsse:BinarySecurityToken[@wswsu:Id="'.$identifier.'"]';
+                            $query = '//wswsse:BinarySecurityToken[@wswsu:Id="' . $identifier . '"]';
                             $nodeset = $this->SOAPXPath->query($query);
                             if ($encmeth = $nodeset->item(0)) {
                                 $x509cert = $encmeth->textContent;
                                 $x509cert = str_replace(array("\r", "\n"), '', $x509cert);
-                                $x509cert = "-----BEGIN CERTIFICATE-----\n".chunk_split($x509cert, 64, "\n")."-----END CERTIFICATE-----\n";
+                                $x509cert = "-----BEGIN CERTIFICATE-----\n" . chunk_split($x509cert, 64, "\n") . "-----END CERTIFICATE-----\n";
                                 $objKey->loadKey($x509cert);
                                 break;
                             }
