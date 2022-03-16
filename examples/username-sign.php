@@ -36,13 +36,8 @@ class MySoap extends SoapClient
      *
      * @return void
      */
-    public function addUserToken(
-        string $username,
-        ?string $password = null,
-        bool $digest = false,
-        bool $addNonce = true,
-        bool $addCreated = true
-    ): void {
+    public function addUserToken($username, $password = null, $digest = false, $addNonce = true, $addCreated = true)
+    {
         $this->username = $username;
         $this->password = $password;
         $this->digest = $digest;
