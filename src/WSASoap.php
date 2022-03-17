@@ -67,7 +67,7 @@ class WSASoap
             $headers = $this->SOAPXPath->query('//wssoap:Envelope/wssoap:Header');
             $header = $headers->item(0);
             if (!$header) {
-                $header = $this->soapDoc->createElementNS($this->soapNS, $this->soapPFX.':Header');
+                $header = $this->soapDoc->createElementNS($this->soapNS, $this->soapPFX . ':Header');
                 $this->envelope->insertBefore($header, $this->envelope->firstChild);
             }
             $this->header = $header;
@@ -87,7 +87,7 @@ class WSASoap
         $this->SOAPXPath->registerNamespace('wssoap', $this->soapNS);
         $this->SOAPXPath->registerNamespace('wswsa', $this->ns);
 
-        $this->envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:'.self::WSAPFX, $this->ns);
+        $this->envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:' . self::WSAPFX, $this->ns);
         $this->locateHeader();
     }
 
@@ -96,7 +96,7 @@ class WSASoap
         /* Add the WSA Action */
         $header = $this->locateHeader();
 
-        $nodeAction = $this->soapDoc->createElementNS($this->ns, self::WSAPFX.':Action', $action);
+        $nodeAction = $this->soapDoc->createElementNS($this->ns, self::WSAPFX . ':Action', $action);
         $header->appendChild($nodeAction);
     }
 
@@ -105,22 +105,22 @@ class WSASoap
         /* Add the WSA From */
         $header = $this->locateHeader();
 
-        $nodeFrom = $this->soapDoc->createElementNS($this->ns, self::WSAPFX.':From');
+        $nodeFrom = $this->soapDoc->createElementNS($this->ns, self::WSAPFX . ':From');
         $header->appendChild($nodeFrom);
 
         if (empty($location)) {
             $location = 'http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous';
         }
-        $nodeAddress = $this->soapDoc->createElementNS($this->ns, self::WSAPFX.':Address', $location);
+        $nodeAddress = $this->soapDoc->createElementNS($this->ns, self::WSAPFX . ':Address', $location);
         $nodeFrom->appendChild($nodeAddress);
     }
-    
+
     public function addTo($location)
     {
         /* Add the WSA To */
         $header = $this->locateHeader();
 
-        $nodeTo = $this->soapDoc->createElementNS($this->ns, self::WSAPFX.':To', $location);
+        $nodeTo = $this->soapDoc->createElementNS($this->ns, self::WSAPFX . ':To', $location);
         $header->appendChild($nodeTo);
     }
 
@@ -137,7 +137,7 @@ class WSASoap
 
         $header = $this->locateHeader();
 
-        $nodeID = $this->soapDoc->createElementNS($this->ns, self::WSAPFX.':MessageID', $id);
+        $nodeID = $this->soapDoc->createElementNS($this->ns, self::WSAPFX . ':MessageID', $id);
         $header->appendChild($nodeID);
         $this->messageID = $id;
     }
@@ -151,13 +151,13 @@ class WSASoap
         /* Add the WSA ReplyTo */
         $header = $this->locateHeader();
 
-        $nodeReply = $this->soapDoc->createElementNS($this->ns, self::WSAPFX.':ReplyTo');
+        $nodeReply = $this->soapDoc->createElementNS($this->ns, self::WSAPFX . ':ReplyTo');
         $header->appendChild($nodeReply);
 
         if (empty($address)) {
             $address = 'http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous';
         }
-        $nodeAddress = $this->soapDoc->createElementNS($this->ns, self::WSAPFX.':Address', $address);
+        $nodeAddress = $this->soapDoc->createElementNS($this->ns, self::WSAPFX . ':Address', $address);
         $nodeReply->appendChild($nodeAddress);
     }
 

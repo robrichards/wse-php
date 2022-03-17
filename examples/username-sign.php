@@ -10,15 +10,39 @@ define('CERT_FILE', 'cert-public_key.pem');
 class MySoap extends SoapClient
 {
 
-    private $_username;
-    private $_password;
-    private $_digest;
+    /** @var string $username */
+    private $username;
 
-    public function addUserToken($username, $password, $digest = false)
+    /** @var null|string $password */
+    private $password;
+
+    /** @var bool $digest */
+    private $digest;
+
+    /** @var bool $addNonce */
+    private $addNonce;
+
+    /** @var bool $addCreated */
+    private $addCreated;
+
+    /**
+     * addUserToken
+     *
+     * @param string $username
+     * @param null|string $password
+     * @param bool $digest
+     * @param bool $addNonce
+     * @param bool $addCreated
+     *
+     * @return void
+     */
+    public function addUserToken($username, $password = null, $digest = false, $addNonce = true, $addCreated = true)
     {
-        $this->_username = $username;
-        $this->_password = $password;
-        $this->_digest = $digest;
+        $this->username = $username;
+        $this->password = $password;
+        $this->digest = $digest;
+        $this->addNonce = $addNonce;
+        $this->addCreated = $addCreated;
     }
 
     public function __doRequest($request, $location, $saction, $version, $one_way = 0)
@@ -32,7 +56,7 @@ class MySoap extends SoapClient
         $objWSSE->signAllHeaders = true;
 
         $objWSSE->addTimestamp();
-        $objWSSE->addUserToken($this->_username, $this->_password, $this->_digest);
+        $objWSSE->addUserToken($this->username, $this->password, $this->digest, $this->addNonce, $this->addCreated);
 
         /* create new XMLSec Key using RSA SHA-1 and type is private key */
         $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, array('type' => 'private'));
