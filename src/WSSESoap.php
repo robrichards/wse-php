@@ -345,11 +345,8 @@ class WSSESoap
             }
             $findTokens = $findTokens->nextSibling;
         }
-        if ($lastToken) {
-            $lastToken = $lastToken->nextSibling;
-        }
 
-        $security->insertBefore($encKey, $lastToken);
+        $security->insertBefore($encKey, $lastToken ? $lastToken->nextSibling : null);
         $key->guid = XMLSecurityDSig::generateGUID();
         $encKey->setAttribute('Id', $key->guid);
         $encMethod = $encKey->firstChild;
@@ -360,13 +357,15 @@ class WSSESoap
             $encMethod = $encMethod->nextSibling;
         }
         $objDoc = $encKey->ownerDocument;
-        $keyInfo = $objDoc->createElementNS('http://www.w3.org/2000/09/xmldsig#', 'dsig:KeyInfo');
-        $encKey->insertBefore($keyInfo, $encMethod);
-        $tokenRef = $objDoc->createElementNS(self::WSSENS, self::WSSEPFX.':SecurityTokenReference');
-        $keyInfo->appendChild($tokenRef);
+
         /* New suff */
         if (is_array($options)) {
             if (!empty($options['KeyInfo'])) {
+                $keyInfo = $objDoc->createElementNS('http://www.w3.org/2000/09/xmldsig#', 'dsig:KeyInfo');
+                $encKey->insertBefore($keyInfo, $encMethod);
+                $tokenRef = $objDoc->createElementNS(self::WSSENS, self::WSSEPFX.':SecurityTokenReference');
+                $keyInfo->appendChild($tokenRef);
+
                 if (!empty($options['KeyInfo']['X509SubjectKeyIdentifier'])) {
                     $reference = $objDoc->createElementNS(self::WSSENS, self::WSSEPFX.':KeyIdentifier');
                     $reference->setAttribute('ValueType', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509SubjectKeyIdentifier');
@@ -384,13 +383,15 @@ class WSSESoap
 
                     return true;
                 }
+
+                if (!empty(($options['KeyInfo']['BinarySecurityToken'])) && $lastToken) {
+                    $tokenURI = '#'.$lastToken->getAttributeNS(self::WSUNS, 'Id');
+                    $reference = $objDoc->createElementNS(self::WSSENS, self::WSSEPFX.':Reference');
+                    $reference->setAttribute('URI', $tokenURI);
+                    $tokenRef->appendChild($reference);
+                }
             }
         }
-
-        $tokenURI = '#'.$token->getAttributeNS(self::WSUNS, 'Id');
-        $reference = $objDoc->createElementNS(self::WSSENS, self::WSSEPFX.':Reference');
-        $reference->setAttribute('URI', $tokenURI);
-        $tokenRef->appendChild($reference);
 
         return true;
     }
