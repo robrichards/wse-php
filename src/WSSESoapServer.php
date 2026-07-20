@@ -156,7 +156,13 @@ class WSSESoapServer
             }
         } while (0);
 
-        if (!$objXMLSecDSig->verify($objKey)) {
+        /*
+         * verify() returns 1 on success, 0 on failure and -1 on error. Because
+         * -1 is truthy in PHP, a loose "!verify()" check would accept a signature
+         * whenever verification errored out (e.g. a malformed embedded
+         * certificate), allowing an authentication bypass. Require an exact 1.
+         */
+        if ($objXMLSecDSig->verify($objKey) !== 1) {
             throw new Exception('Unable to validate Signature');
         }
 
