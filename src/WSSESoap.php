@@ -368,21 +368,23 @@ class WSSESoap
         if (is_array($options)) {
             if (!empty($options['KeyInfo'])) {
                 if (!empty($options['KeyInfo']['X509SubjectKeyIdentifier'])) {
-                    $reference = $objDoc->createElementNS(self::WSSENS, self::WSSEPFX.':KeyIdentifier');
-                    $reference->setAttribute('ValueType', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509SubjectKeyIdentifier');
-                    $reference->setAttribute('EncodingType', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary');
-                    $tokenRef->appendChild($reference);
                     $x509 = openssl_x509_parse($token->getX509Certificate());
-                    $keyid = $x509['extensions']['subjectKeyIdentifier'];
-                    $arkeyid = explode(':', $keyid);
-                    $data = '';
-                    foreach ($arkeyid as $hexchar) {
-                        $data .= chr(hexdec($hexchar));
-                    }
-                    $dataNode = new DOMText(base64_encode($data));
-                    $reference->appendChild($dataNode);
+                    $keyid = $x509['extensions']['subjectKeyIdentifier'] ?? null;
+                    if (!empty($keyid)) {
+                        $reference = $objDoc->createElementNS(self::WSSENS, self::WSSEPFX.':KeyIdentifier');
+                        $reference->setAttribute('ValueType', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509SubjectKeyIdentifier');
+                        $reference->setAttribute('EncodingType', 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary');
+                        $tokenRef->appendChild($reference);
+                        $arkeyid = explode(':', $keyid);
+                        $data = '';
+                        foreach ($arkeyid as $hexchar) {
+                            $data .= chr(hexdec($hexchar));
+                        }
+                        $dataNode = new DOMText(base64_encode($data));
+                        $reference->appendChild($dataNode);
 
-                    return true;
+                        return true;
+                    }
                 }
             }
         }
