@@ -146,7 +146,7 @@ class WSSESoapServer
                                 $x509cert = $encmeth->textContent;
                                 $x509cert = str_replace(array("\r", "\n"), '', $x509cert);
                                 $x509cert = "-----BEGIN CERTIFICATE-----\n".chunk_split($x509cert, 64, "\n")."-----END CERTIFICATE-----\n";
-                                $objKey->loadKey($x509cert);
+                                $objKey->loadKey($x509cert, false, true);
                                 break;
                             }
                         }
