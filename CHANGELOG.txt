@@ -11,6 +11,8 @@ Requirements (breaking):
 - Require robrichards/xmlseclibs ^4.0 (2.x required >= 3.0.4)
 
 Improvements:
+- Add soap-server-sign-encrypt.php server-side example (decrypt, verify, sign,
+  encrypt response). Refs #8
 - WSSESoapServer::getSigningKey() returns the key used to verify the last
   processed signature (e.g. caller certificate thumbprint). Refs #49
 - WSSESoap::addUserToken() accepts optional $addNonce and $addCreated flags
