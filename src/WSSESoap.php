@@ -577,6 +577,92 @@ class WSSESoap
         $this->addEncryptedKey($signode, $enc, $siteKey, $options);
     }
 
+    private function removeDataReference(DOMElement $encKeyNode, $referenceId)
+    {
+        $refList = null;
+        foreach ($encKeyNode->childNodes as $child) {
+            if ($child->nodeType === XML_ELEMENT_NODE
+                && $child->namespaceURI === XMLSecEnc::XMLENCNS
+                && $child->localName === 'ReferenceList') {
+                $refList = $child;
+                break;
+            }
+        }
+        if (!$refList) {
+            return;
+        }
+
+        $targetUri = '#'.$referenceId;
+        $toRemove = array();
+        foreach ($refList->childNodes as $child) {
+            if ($child->nodeType === XML_ELEMENT_NODE
+                && $child->namespaceURI === XMLSecEnc::XMLENCNS
+                && $child->localName === 'DataReference'
+                && $child->getAttribute('URI') === $targetUri) {
+                $toRemove[] = $child;
+            }
+        }
+        foreach ($toRemove as $child) {
+            $refList->removeChild($child);
+        }
+    }
+
+    private function cleanupEncryptedKey(DOMElement $encKeyNode)
+    {
+        $refList = null;
+        foreach ($encKeyNode->childNodes as $child) {
+            if ($child->nodeType === XML_ELEMENT_NODE
+                && $child->namespaceURI === XMLSecEnc::XMLENCNS
+                && $child->localName === 'ReferenceList') {
+                $refList = $child;
+                break;
+            }
+        }
+
+        if ($refList) {
+            $hasDataRef = false;
+            foreach ($refList->childNodes as $child) {
+                if ($child->nodeType === XML_ELEMENT_NODE
+                    && $child->namespaceURI === XMLSecEnc::XMLENCNS
+                    && $child->localName === 'DataReference') {
+                    $hasDataRef = true;
+                    break;
+                }
+            }
+            if ($hasDataRef) {
+                return;
+            }
+            $encKeyNode->removeChild($refList);
+        }
+
+        $parent = $encKeyNode->parentNode;
+        if ($parent) {
+            $parent->removeChild($encKeyNode);
+            if ($parent instanceof DOMElement) {
+                $this->cleanupEmptyElementContainer($parent);
+            }
+        }
+    }
+
+    private function cleanupEmptyElementContainer(DOMElement $node)
+    {
+        foreach ($node->childNodes as $child) {
+            if ($child->nodeType === XML_ELEMENT_NODE) {
+                return;
+            }
+        }
+
+        $parent = $node->parentNode;
+        if (!$parent) {
+            return;
+        }
+
+        $parent->removeChild($node);
+        if ($parent instanceof DOMElement) {
+            $this->cleanupEmptyElementContainer($parent);
+        }
+    }
+
     public function decryptSoapDoc($doc, $options)
     {
         $privKey = null;
@@ -601,7 +687,9 @@ class WSSESoap
         $nodes = $xpath->query('/soapns:Envelope/soapns:Header/*[local-name()="Security"]/soapenc:EncryptedKey');
 
         $references = array();
+        $encKeyNode = null;
         if ($node = $nodes->item(0)) {
+            $encKeyNode = $node;
             $objenc = new XMLSecEnc();
             $objenc->setNode($node);
             if (!$objKey = $objenc->locateKey()) {
@@ -644,7 +732,14 @@ class WSSESoap
 
             $objenc->setNode($encData);
             $objenc->type = $encData->getAttribute('Type');
-            $decrypt = $objenc->decryptNode($objKey, true);
+            $objenc->decryptNode($objKey, true);
+            if ($encKeyNode instanceof DOMElement) {
+                $this->removeDataReference($encKeyNode, $reference);
+            }
+        }
+
+        if ($encKeyNode instanceof DOMElement) {
+            $this->cleanupEncryptedKey($encKeyNode);
         }
 
         return true;
