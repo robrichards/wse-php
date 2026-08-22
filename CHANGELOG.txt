@@ -1,12 +1,5 @@
 wse-php
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2026, 3.0.1
-Improvements:
-- WSSESoap::addUserToken() accepts optional $addNonce and $addCreated flags
-  (default true for backward compatibility). Refs #66
-- WSSESoap::attachX509DatatoSig() attaches Issuer/Serial KeyInfo to a signature.
-  Refs #32
-
 ?? ??? 2026, 3.0.0
 Features:
 - Add wse-php.php bootstrap for non-Composer installs (loads vendor/autoload.php
@@ -18,6 +11,10 @@ Requirements (breaking):
 - Require robrichards/xmlseclibs ^4.0 (2.x required >= 3.0.4)
 
 Improvements:
+- WSSESoap::addUserToken() accepts optional $addNonce and $addCreated flags
+  (default true for backward compatibility). Refs #66
+- WSSESoap::attachX509DatatoSig() attaches Issuer/Serial KeyInfo to a signature.
+  Refs #32
 - WSASoap::addMessageID() returns the generated MessageID
 - WSASoap uses the WS-Addressing 2005 anonymous URI when the 2005 namespace is
   in use (From / ReplyTo)
@@ -36,6 +33,8 @@ Security Improvements:
   allowing a signature authentication bypass
 
 Bug Fixes:
+- WSSESoap::decryptSoapDoc() removes DataReferences after successful decrypt
+  and drops empty EncryptedKey / Security header nodes. Refs #7
 - WSSESoapServer: fix undefined $secnode when the Security header is empty (#56)
 - WSSESoapServer: load embedded X509 certificates with isCert=true
 - WSSESoap: fix X509SubjectKeyIdentifier signing when Signature is the sole
