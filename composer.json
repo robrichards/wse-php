@@ -20,7 +20,7 @@
 		}
 	},
 	"require" : {
-		"php": ">= 8.0",
+		"php": ">= 8.1",
 		"robrichards/xmlseclibs" : "^4.0"
 	},
 	"minimum-stability": "beta",

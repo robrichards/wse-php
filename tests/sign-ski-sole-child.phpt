@@ -29,7 +29,6 @@ $ref = new ReflectionClass($signKey);
 /* Reload using PEM that is private key, then set x509 via reflection of private prop if needed. */
 $pemCert = file_get_contents($cert);
 $prop = $ref->getProperty('x509Certificate');
-$prop->setAccessible(true);
 $prop->setValue($signKey, $pemCert);
 
 $wsse->signSoapDoc($signKey, array(
