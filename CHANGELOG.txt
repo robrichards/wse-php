@@ -11,6 +11,8 @@ Requirements (breaking):
 - Require robrichards/xmlseclibs ^4.0 (2.x required >= 3.0.4)
 
 Improvements:
+- WSSESoapServer::getSigningKey() returns the key used to verify the last
+  processed signature (e.g. caller certificate thumbprint). Refs #49
 - WSSESoap::addUserToken() accepts optional $addNonce and $addCreated flags
   (default true for backward compatibility). Refs #66
 - WSSESoap::attachX509DatatoSig() attaches Issuer/Serial KeyInfo to a signature.

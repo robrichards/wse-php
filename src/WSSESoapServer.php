@@ -6,6 +6,7 @@ use DOMXPath;
 use Exception;
 use RobRichards\XMLSecLibs\XMLSecEnc;
 use RobRichards\XMLSecLibs\XMLSecurityDSig;
+use RobRichards\XMLSecLibs\XMLSecurityKey;
 
 /**
  * WSSESoapServer.php.
@@ -60,6 +61,8 @@ class WSSESoapServer
     private $envelope = null;
     private $SOAPXPath = null;
     private $secNode = null;
+    /** @var XMLSecurityKey|null Key used to verify the last processed signature */
+    private $signingKey = null;
     public $signAllHeaders = false;
 
     private function locateSecurityHeader($setActor = null)
@@ -166,7 +169,20 @@ class WSSESoapServer
             throw new Exception('Unable to validate Signature');
         }
 
+        $this->signingKey = $objKey;
+
         return true;
+    }
+
+    /**
+     * Returns the key used to verify the last successfully processed signature.
+     *
+     * Call after process() or processSignature() succeeds. Useful for reading
+     * the caller certificate thumbprint via getX509Thumbprint().
+     */
+    public function getSigningKey(): ?XMLSecurityKey
+    {
+        return $this->signingKey;
     }
 
     public function process()
