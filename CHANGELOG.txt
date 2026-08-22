@@ -1,5 +1,10 @@
 wse-php
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2026, 3.0.1
+Improvements:
+- WSSESoap::addUserToken() accepts optional $addNonce and $addCreated flags
+  (default true for backward compatibility). Refs #66
+
 ?? ??? 2026, 3.0.0
 Features:
 - Add wse-php.php bootstrap for non-Composer installs (loads vendor/autoload.php
