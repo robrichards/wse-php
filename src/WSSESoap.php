@@ -132,10 +132,13 @@ class WSSESoap
         }
     }
 
-    public function addUserToken($userName, $password = null, $passwordDigest = false)
+    public function addUserToken($userName, $password = null, $passwordDigest = false, $addNonce = true, $addCreated = true)
     {
         if ($passwordDigest && empty($password)) {
             throw new Exception('Cannot calculate the digest without a password');
+        }
+        if ($passwordDigest && (!$addNonce || !$addCreated)) {
+            throw new Exception('Password digest requires Nonce and Created elements');
         }
 
         $security = $this->locateSecurityHeader();
@@ -148,10 +151,12 @@ class WSSESoap
         $username->appendChild($usernameText);
         $token->appendChild($username);
 
-        /* Generate nonce - create a 256 bit session key to be used */
-        $objKey = new XMLSecurityKey(XMLSecurityKey::AES256_CBC);
-        $nonce = $objKey->generateSessionKey();
-        unset($objKey);
+        $nonce = null;
+        if ($addNonce) {
+            $objKey = new XMLSecurityKey(XMLSecurityKey::AES256_CBC);
+            $nonce = $objKey->generateSessionKey();
+            unset($objKey);
+        }
         $createdate = gmdate("Y-m-d\TH:i:s").'Z';
 
         if ($password) {
@@ -167,12 +172,16 @@ class WSSESoap
             $passwordNode->setAttribute('Type', $passType);
         }
 
-        $nonceNode = $this->soapDoc->createElementNS(self::WSSENS,  self::WSSEPFX.':Nonce', base64_encode($nonce));
-        $nonceNode->setAttribute('EncodingType', "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary");
-        $token->appendChild($nonceNode);
+        if ($addNonce) {
+            $nonceNode = $this->soapDoc->createElementNS(self::WSSENS,  self::WSSEPFX.':Nonce', base64_encode($nonce));
+            $nonceNode->setAttribute('EncodingType', "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary");
+            $token->appendChild($nonceNode);
+        }
 
-        $created = $this->soapDoc->createElementNS(self::WSUNS,  self::WSUPFX.':Created', $createdate);
-        $token->appendChild($created);
+        if ($addCreated) {
+            $created = $this->soapDoc->createElementNS(self::WSUNS,  self::WSUPFX.':Created', $createdate);
+            $token->appendChild($created);
+        }
     }
 
     public function addBinaryToken($cert, $isPEMFormat = true, $isDSig = true)
