@@ -44,7 +44,8 @@ class MySoap extends SoapClient
         $siteKey->loadKey(SERVICE_CERT, true, true);
 
         $options = array("KeyInfo" => array("X509SubjectKeyIdentifier" => true));
-        $objWSSE->encryptSoapDoc($siteKey, $objKey, $options);
+        /* false: leave Signature unencrypted so soap-server-sign-encrypt.php can verify after decrypt */
+        $objWSSE->encryptSoapDoc($siteKey, $objKey, $options, false);
 
         $retVal = parent::__doRequest($objWSSE->saveXML(), $location, $saction, $version);
 
