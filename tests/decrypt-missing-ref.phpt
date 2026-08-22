@@ -2,12 +2,12 @@
 decryptSoapDoc throws on missing EncryptedData reference instead of fatal
 --FILE--
 <?php
-require dirname(__FILE__) . '/bootstrap.php';
+require dirname(__FILE__) . '/../wse-php.php';
 use RobRichards\WsePhp\WSSESoap;
 use RobRichards\XMLSecLibs\XMLSecurityKey;
 
-$priv = dirname(__FILE__) . '/../../xmlseclibs/tests/privkey.pem';
-$cert = dirname(__FILE__) . '/../../xmlseclibs/tests/mycert.pem';
+$priv = dirname(__FILE__) . '/fixtures/privkey.pem';
+$cert = dirname(__FILE__) . '/fixtures/mycert.pem';
 
 $doc = new DOMDocument();
 $doc->loadXML('<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Header/><soap:Body><ping>1</ping></soap:Body></soap:Envelope>');

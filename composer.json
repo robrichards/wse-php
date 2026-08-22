@@ -20,7 +20,7 @@
 		}
 	},
 	"require" : {
-		"php" : ">= 5.3",
-		"robrichards/xmlseclibs" : ">=3.0.4"
+		"php": ">= 8.0",
+		"robrichards/xmlseclibs" : "^4.0"
 	}
 }

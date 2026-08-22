@@ -2,7 +2,7 @@
 SOAP 1.2 Security header role attribute is matched
 --FILE--
 <?php
-require dirname(__FILE__) . '/bootstrap.php';
+require dirname(__FILE__) . '/../wse-php.php';
 use RobRichards\WsePhp\WSSESoap;
 
 $xml = <<<XML

@@ -2,7 +2,7 @@
 WSASoap addMessageID returns ID on first call; 2005 anonymous URI
 --FILE--
 <?php
-require dirname(__FILE__) . '/bootstrap.php';
+require dirname(__FILE__) . '/../wse-php.php';
 use RobRichards\WsePhp\WSASoap;
 
 $doc = new DOMDocument();
