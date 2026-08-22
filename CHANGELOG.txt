@@ -4,6 +4,8 @@ wse-php
 Improvements:
 - WSSESoap::addUserToken() accepts optional $addNonce and $addCreated flags
   (default true for backward compatibility). Refs #66
+- WSSESoap::attachX509DatatoSig() attaches Issuer/Serial KeyInfo to a signature.
+  Refs #32
 
 ?? ??? 2026, 3.0.0
 Features:
