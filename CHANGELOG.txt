@@ -1,6 +1,6 @@
 wse-php
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2026, 3.0.0
+22, Aug 2026, 3.0.0
 Features:
 - Add wse-php.php bootstrap for non-Composer installs (loads vendor/autoload.php
   or a sibling xmlseclibs checkout)
