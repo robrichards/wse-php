@@ -37,6 +37,7 @@
  * @author    Robert Richards <rrichards@cdatazone.org>
  * @copyright 2007-2026 Robert Richards <rrichards@cdatazone.org>
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @version   3.0.0
  */
 
 $vendorAutoload = __DIR__ . '/vendor/autoload.php';

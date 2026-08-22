@@ -1,5 +1,41 @@
 wse-php
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2026, 3.0.0
+Features:
+- Add wse-php.php bootstrap for non-Composer installs (loads vendor/autoload.php
+  or a sibling xmlseclibs checkout)
+- Add GitHub Actions CI workflow and PHPUnit .phpt regression tests
+
+Requirements (breaking):
+- Require PHP 8.1+ (2.x supported PHP 5.3+)
+- Require robrichards/xmlseclibs ^4.0 (2.x required >= 3.0.4)
+
+Improvements:
+- WSASoap::addMessageID() returns the generated MessageID
+- WSASoap uses the WS-Addressing 2005 anonymous URI when the 2005 namespace is
+  in use (From / ReplyTo)
+- WSSESoap matches and sets SOAP 1.2 Security header role (not actor)
+- WSSESoap inserts EncryptedKey before Signature for correct sign-then-encrypt
+  Security header ordering
+- WSSESoap addEncryptedKey() accepts an XMLSecurityKey or BinarySecurityToken
+  DOM element; validate X509SubjectKeyIdentifier inputs
+- WSSESoap decryptSoapDoc() throws on invalid or missing EncryptedData references
+  instead of fatalling
+- WSSESoap EncryptBody() throws when the SOAP Body cannot be located
+
+Security Improvements:
+- WSSESoapServer: require verify() === 1; the previous loose "!verify()" check
+  treated -1 (verification error, e.g. malformed embedded certificate) as success,
+  allowing a signature authentication bypass
+
+Bug Fixes:
+- WSSESoapServer: fix undefined $secnode when the Security header is empty (#56)
+- WSSESoapServer: load embedded X509 certificates with isCert=true
+- WSSESoap: fix X509SubjectKeyIdentifier signing when Signature is the sole
+  Security header child
+- WSSESoap: fix sibling traversal in addEncryptedKey() (nextSibling, not
+  nextChild)
+
 11 May 2020, 2.0.4
 Improvements:
 - Add support for variable WSA NS in RelatesTo field. PR #55
