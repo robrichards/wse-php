@@ -595,7 +595,7 @@ class WSSESoap
         $targetUri = '#'.$referenceId;
         $toRemove = array();
         foreach ($refList->childNodes as $child) {
-            if ($child->nodeType === XML_ELEMENT_NODE
+            if ($child instanceof DOMElement
                 && $child->namespaceURI === XMLSecEnc::XMLENCNS
                 && $child->localName === 'DataReference'
                 && $child->getAttribute('URI') === $targetUri) {
@@ -688,6 +688,7 @@ class WSSESoap
 
         $references = array();
         $encKeyNode = null;
+        $key = null;
         if ($node = $nodes->item(0)) {
             $encKeyNode = $node;
             $objenc = new XMLSecEnc();
@@ -698,13 +699,11 @@ class WSSESoap
             $objKey->isEncrypted = true;
             $objKey->encryptedCtx = $objenc;
             XMLSecEnc::staticLocateKeyInfo($objKey, $node);
-            if ($objKey && $objKey->isEncrypted) {
-                $objencKey = $objKey->encryptedCtx;
-                $objKey->passphrase = $privKey_passphrase;
-                $objKey->loadKey($privKey, $privKey_isFile, $privKey_isCert);
-                $key = $objencKey->decryptKey($objKey);
-                $objKey->loadKey($key);
-            }
+            $objencKey = $objKey->encryptedCtx;
+            $objKey->passphrase = $privKey_passphrase;
+            $objKey->loadKey($privKey, $privKey_isFile, $privKey_isCert);
+            $key = $objencKey->decryptKey($objKey);
+            $objKey->loadKey($key);
 
             $refnodes = $xpath->query('./soapenc:ReferenceList/soapenc:DataReference/@URI', $node);
             foreach ($refnodes as $reference) {
@@ -721,14 +720,19 @@ class WSSESoap
             $query = '//*[@Id="'.$reference.'"]';
             $nodes = $xpath->query($query);
             $encData = $nodes->item(0);
-            if (!$encData) {
+            if (!$encData instanceof DOMElement) {
                 throw new Exception('Unable to locate EncryptedData for DataReference');
             }
 
-            if ($algo = $xpath->evaluate('string(./soapenc:EncryptionMethod/@Algorithm)', $encData)) {
-                $objKey = new XMLSecurityKey($algo);
-                $objKey->loadKey($key);
+            $algo = $xpath->evaluate('string(./soapenc:EncryptionMethod/@Algorithm)', $encData);
+            if (empty($algo)) {
+                throw new Exception('Unable to locate EncryptionMethod for EncryptedData');
             }
+            if ($key === null) {
+                throw new Exception('Unable to decrypt Encrypted Key');
+            }
+            $objKey = new XMLSecurityKey($algo);
+            $objKey->loadKey($key);
 
             $objenc->setNode($encData);
             $objenc->type = $encData->getAttribute('Type');

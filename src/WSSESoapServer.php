@@ -56,7 +56,7 @@ class WSSESoapServer
     const WSUNS = 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd';
     const WSSEPFX = 'wsse';
     const WSUPFX = 'wsu';
-    private $soapNS, $soapPFX;
+    private $soapNS;
     private $soapDoc = null;
     private $envelope = null;
     private $SOAPXPath = null;
@@ -96,7 +96,6 @@ class WSSESoapServer
         $this->soapDoc = $doc;
         $this->envelope = $doc->documentElement;
         $this->soapNS = $this->envelope->namespaceURI;
-        $this->soapPFX = $this->envelope->prefix;
         $this->SOAPXPath = new DOMXPath($doc);
         $this->SOAPXPath->registerNamespace('wssoap', $this->soapNS);
         $this->SOAPXPath->registerNamespace('wswsu', self::WSUNS);
