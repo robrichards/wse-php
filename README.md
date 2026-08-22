@@ -6,6 +6,5 @@ The WS-Security library also requires the use of the xmlseclibs library which su
 
 # Branches
 Only the master branch is actively maintained.
-* master: Contains namespace support requiring 5.3+.
-
-Mailing List: https://groups.google.com/forum/#!forum/wse-php
+* master: Contains namespace support requiring 8.1+.
+* 2.0: PHP support requiring 5.3+. No longer maintained
